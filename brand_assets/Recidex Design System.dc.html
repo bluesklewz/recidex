@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="" />
+<link href="https://fonts.googleapis.com/css2?family=Chathura:wght@400;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+<style>
+  body { margin: 0; background: #1E1917; }
+  a { color: #C07000; text-decoration: none; }
+  a:hover { color: #F0EDE4; }
+  @keyframes caret { 0%, 49% { opacity: 1 } 50%, 100% { opacity: 0 } }
+  @keyframes riseIn { from { opacity: 0; transform: translateY(6px) } to { opacity: 1; transform: none } }
+  @keyframes breathe { 0%, 100% { opacity: .45 } 50% { opacity: .8 } }
+</style>
+</helmet>
+<div style="position: relative; min-height: 100vh; background: #1E1917; font-family: 'JetBrains Mono', ui-monospace, monospace; color: #F0EDE4; overflow: hidden; padding: 0 0 160px">
+
+  <div style="position: absolute; inset: 0; pointer-events: none; background: radial-gradient(120% 80% at 18% 4%, #5A4E45 0%, #3A312C 34%, #251F1C 68%, #1E1917 100%)"></div>
+  <div style="position: absolute; inset: 0; pointer-events: none; background: radial-gradient(60% 40% at 78% 22%, rgba(181,164,55,.10), rgba(181,164,55,0) 70%)"></div>
+
+  <div style="position: relative; max-width: 1180px; margin: 0 auto; padding: 0 clamp(24px, 5vw, 96px)">
+
+    <header style="display: flex; flex-wrap: wrap; gap: 32px; justify-content: space-between; align-items: baseline; padding: clamp(48px, 7vw, 96px) 0 0">
+      <div style="font-family: 'Chathura', sans-serif; font-size: 22px; letter-spacing: .28em; text-transform: uppercase">Recidex</div>
+      <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">Design System &nbsp;/&nbsp; v1.0 &nbsp;/&nbsp; Sept 2026</div>
+    </header>
+
+    <section style="max-width: 760px; margin-left: auto; padding: clamp(96px, 14vw, 200px) 0 clamp(64px, 8vw, 128px)">
+      <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #C07000; margin-bottom: 32px">Foundation</div>
+      <h1 style="font-family: 'Chathura', sans-serif; font-weight: 400; font-size: clamp(59px, 9.6vw, 112px); line-height: 1.04; letter-spacing: -.01em; margin: 0 0 32px; text-wrap: pretty">A system for the moment before the recipe exists.</h1>
+      <p style="font-size: 15px; line-height: 1.75; color: #B0A49B; margin: 0; max-width: 60ch; text-wrap: pretty">Recidex generates recipes. The interface holds a threshold: something is arriving, not yet resolved. Depth blur, unhurried transitions and a single warm ground carry that state. Everything else is stripped to monospace and space.</p>
+    </section>
+
+    <section style="display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); background: #372F2A; margin-bottom: clamp(96px, 12vw, 176px)">
+      <div style="background: #2A2421; padding: 32px 28px">
+        <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 16px">01 &nbsp; Ground</div>
+        <div style="font-size: 14px; line-height: 1.7; color: #F0EDE4">Brown is the room. It is never a component fill — only the space components sit in.</div>
+      </div>
+      <div style="background: #2A2421; padding: 32px 28px">
+        <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 16px">02 &nbsp; No borders</div>
+        <div style="font-size: 14px; line-height: 1.7; color: #F0EDE4">Nothing is outlined. Separation comes from surface value, blur and space — never a stroke.</div>
+      </div>
+      <div style="background: #2A2421; padding: 32px 28px">
+        <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 16px">03 &nbsp; Paper is content</div>
+        <div style="font-size: 14px; line-height: 1.7; color: #F0EDE4">Off-white appears only where a recipe does. It marks the artifact, not the chrome.</div>
+      </div>
+      <div style="background: #2A2421; padding: 32px 28px">
+        <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 16px">04 &nbsp; Slow</div>
+        <div style="font-size: 14px; line-height: 1.7; color: #F0EDE4">Transitions run 400–900ms on a soft ease. Nothing snaps. Nothing spins.</div>
+      </div>
+    </section>
+
+    <section style="padding-bottom: clamp(96px, 12vw, 176px)">
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: baseline; justify-content: space-between; margin-bottom: 36px">
+        <h2 style="font-family: 'Chathura', sans-serif; font-weight: 400; font-size: clamp(41px, 5.9vw, 65px); margin: 0; letter-spacing: -.01em">Color</h2>
+        <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">Five families. No sixth.</div>
+      </div>
+
+      <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 24px">Primary &nbsp;·&nbsp; Brown ramp</div>
+      <p style="font-size: 14px; line-height: 1.7; color: #B0A49B; max-width: 62ch; margin: 0 0 32px">Five steps, used as elevation. Lower numbers sit further back. Step 40 is the only step that may appear as a hover or pressed surface; steps 05–20 are grounds and panels. Brown is never used for text.</p>
+      <div style="display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 176px), 1fr)); margin-bottom: 72px">
+        <div style="background: #1E1917; padding: 24px 20px; min-height: 168px; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="font-size: 12px; letter-spacing: .12em; color: #F0EDE4">brown-05</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; color: #B0A49B">#1E1917</div>
+            <div style="font-size: 12px; line-height: 1.5; color: #B0A49B">Page base, behind the glow</div>
+          </div>
+        </div>
+        <div style="background: #2A2421; padding: 24px 20px; min-height: 168px; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="font-size: 12px; letter-spacing: .12em; color: #F0EDE4">brown-10</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; color: #B0A49B">#2A2421</div>
+            <div style="font-size: 12px; line-height: 1.5; color: #B0A49B">Panels, cells, inputs at rest</div>
+          </div>
+        </div>
+        <div style="background: #372F2A; padding: 24px 20px; min-height: 168px; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="font-size: 12px; letter-spacing: .12em; color: #F0EDE4">brown-20</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; color: #B0A49B">#372F2A</div>
+            <div style="font-size: 12px; line-height: 1.5; color: #B0A49B">Dividers as 1px gaps, modal veil</div>
+          </div>
+        </div>
+        <div style="background: #473D36; padding: 24px 20px; min-height: 168px; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="font-size: 12px; letter-spacing: .12em; color: #F0EDE4">brown-30</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; color: #C4BAB2">#473D36</div>
+            <div style="font-size: 12px; line-height: 1.5; color: #C4BAB2">Secondary button fill, chips at rest</div>
+          </div>
+        </div>
+        <div style="background: #5A4E45; padding: 24px 20px; min-height: 168px; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="font-size: 12px; letter-spacing: .12em; color: #F0EDE4">brown-40</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; color: #D6CFC9">#5A4E45</div>
+            <div style="font-size: 12px; line-height: 1.5; color: #D6CFC9">Hover and pressed surfaces only</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 24px">Neutral &nbsp;·&nbsp; Paper, ink, tint</div>
+      <p style="font-size: 14px; line-height: 1.7; color: #B0A49B; max-width: 62ch; margin: 0 0 32px">Paper is the recipe artifact and nothing else — cards, sheets, print. Ink is the only text color allowed on paper. Tint is the single muted text value on brown; there is no opacity-based text in this system.</p>
+      <div style="display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr)); margin-bottom: 72px">
+        <div style="background: #F0EDE4; padding: 28px 24px; min-height: 176px; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="font-family: 'Chathura', sans-serif; font-size: 19px; letter-spacing: .2em; text-transform: uppercase; color: #141110">Paper</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; color: #141110">#F0EDE4 &nbsp;/&nbsp; paper</div>
+            <div style="font-size: 12px; line-height: 1.55; color: #4A423C">Recipe cards, sheets, modals. Primary text on brown grounds.</div>
+          </div>
+        </div>
+        <div style="background: #141110; padding: 28px 24px; min-height: 176px; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="font-family: 'Chathura', sans-serif; font-size: 19px; letter-spacing: .2em; text-transform: uppercase; color: #F0EDE4">Ink</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; color: #B0A49B">#141110 &nbsp;/&nbsp; ink</div>
+            <div style="font-size: 12px; line-height: 1.55; color: #B0A49B">All type on paper. Never used as a page ground.</div>
+          </div>
+        </div>
+        <div style="background: #2A2421; padding: 28px 24px; min-height: 176px; display: flex; flex-direction: column; justify-content: space-between">
+          <div style="font-family: 'Chathura', sans-serif; font-size: 19px; letter-spacing: .2em; text-transform: uppercase; color: #B0A49B">Tint</div>
+          <div style="display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 12px; color: #B0A49B">#B0A49B &nbsp;/&nbsp; tint</div>
+            <div style="font-size: 12px; line-height: 1.55; color: #B0A49B">Secondary text, labels, metadata, placeholders on brown.</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 24px">Accent &nbsp;·&nbsp; Orange and red</div>
+      <div style="display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr))">
+        <div style="background: #2A2421; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px">
+          <div style="height: 88px; background: #C07000"></div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 22px; letter-spacing: .18em; text-transform: uppercase">Orange &nbsp;#C07000</div>
+            <div style="font-size: 13px; line-height: 1.7; color: #B0A49B">Interaction. Filled tags and metadata chips, focus rings, selected states, section eyebrows. Carries ink text when filled, never paper. Not a primary action color — generate is a paper button.</div>
+          </div>
+        </div>
+        <div style="background: #2A2421; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px">
+          <div style="height: 88px; background: #C43D2E"></div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 22px; letter-spacing: .18em; text-transform: uppercase">Red &nbsp;#C43D2E</div>
+            <div style="font-size: 13px; line-height: 1.7; color: #B0A49B">Rare marker. Batch and ID numerals, the active dot in a stack, one point of emphasis per view. Not destructive, not error, not a fill larger than 24px. If red appears twice in a viewport, one use is wrong.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <sc-if value="{{ showLight }}" hint-placeholder-val="{{ true }}">
+    <section style="padding-bottom: clamp(96px, 12vw, 176px)">
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: baseline; justify-content: space-between; margin-bottom: 40px">
+        <h2 style="font-family: 'Chathura', sans-serif; font-weight: 400; font-size: clamp(41px, 5.9vw, 65px); margin: 0; letter-spacing: -.01em">Light variant</h2>
+        <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">Token table only</div>
+      </div>
+      <p style="font-size: 14px; line-height: 1.7; color: #B0A49B; max-width: 62ch; margin: 0 0 40px">Roles flip; hues do not. Paper becomes the ground and the brown ramp inverts, so ink carries body copy. Accents are unchanged — orange keeps ink text, red keeps its scarcity rule.</p>
+      <div style="display: grid; gap: 1px; background: #372F2A">
+        <div style="display: grid; gap: 1px; grid-template-columns: 1.1fr 1fr 1fr; background: #372F2A">
+          <div style="background: #1E1917; padding: 16px 20px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #C07000">Role</div>
+          <div style="background: #1E1917; padding: 16px 20px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #C07000">Dark</div>
+          <div style="background: #1E1917; padding: 16px 20px; font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #C07000">Light</div>
+        </div>
+        <sc-for list="{{ lightRows }}" as="row" hint-placeholder-count="6">
+          <div style="display: grid; gap: 1px; grid-template-columns: 1.1fr 1fr 1fr; background: #372F2A">
+            <div style="background: #2A2421; padding: 16px 20px; font-size: 13px; color: #F0EDE4">{{ row.role }}</div>
+            <div style="background: #2A2421; padding: 16px 20px; font-size: 13px; color: #B0A49B">{{ row.dark }}</div>
+            <div style="background: #2A2421; padding: 16px 20px; font-size: 13px; color: #B0A49B">{{ row.light }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+    </sc-if>
+
+    <section style="padding-bottom: clamp(96px, 12vw, 176px)">
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: baseline; justify-content: space-between; margin-bottom: 36px">
+        <h2 style="font-family: 'Chathura', sans-serif; font-weight: 400; font-size: clamp(41px, 5.9vw, 65px); margin: 0; letter-spacing: -.01em">Typography</h2>
+        <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">Two families</div>
+      </div>
+
+      <div style="display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 1fr)); margin-bottom: 72px">
+        <div style="background: #2A2421; padding: 40px 32px">
+          <div style="font-family: 'Chathura', sans-serif; font-size: 83px; line-height: 1; margin-bottom: 28px">Aa</div>
+          <div style="font-family: 'Chathura', sans-serif; font-size: 21px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 12px">Chathura</div>
+          <div style="font-size: 13px; line-height: 1.7; color: #B0A49B">Display. Recipe titles, section heads, wordmark, numerals in labels. Regular weight only — never bold, never below 20px, never for running text.</div>
+        </div>
+        <div style="background: #2A2421; padding: 40px 32px">
+          <div style="font-size: 36px; line-height: 1; margin-bottom: 28px; font-weight: 300">Aa</div>
+          <div style="font-family: 'Chathura', sans-serif; font-size: 21px; letter-spacing: .2em; text-transform: uppercase; margin-bottom: 12px">JetBrains Mono</div>
+          <div style="font-size: 13px; line-height: 1.7; color: #B0A49B">The ambient voice. Body copy, steps, ingredients, labels, buttons, inputs, breadcrumbs. Weights 300 / 400 / 500 only.</div>
+        </div>
+      </div>
+
+      <div style="display: grid; gap: 1px; background: #372F2A">
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">display-xl</div>
+            <div style="font-size: 12px; color: #B0A49B">Chathura 112 / 1.04 / -1%</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Page opener. One per view.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 59px; line-height: 1.04; white-space: nowrap">Almond Sea Salt</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">display-lg</div>
+            <div style="font-size: 12px; color: #B0A49B">Chathura 65 / 1.1 / -1%</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Recipe title, section head.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 44px; line-height: 1.1">Instructions</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">display-sm</div>
+            <div style="font-size: 12px; color: #B0A49B">Chathura 33 / 1.2</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Modal title, card head.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 33px; line-height: 1.2">Save to a collection</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">label</div>
+            <div style="font-size: 12px; color: #B0A49B">Chathura 19 / 0.2em / caps</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Wordmark, card labels.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 19px; letter-spacing: .2em">BATCH NO. 007</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">body-lg</div>
+            <div style="font-size: 12px; color: #B0A49B">Mono 300 · 15 / 1.75</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Intro copy, step text.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-size: 15px; font-weight: 300; line-height: 1.75">Toast the almonds before folding.</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">body</div>
+            <div style="font-size: 12px; color: #B0A49B">Mono 400 · 14 / 1.7</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Default running text.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-size: 14px; line-height: 1.7">60 grams · 40 minutes · yield 8</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">ui</div>
+            <div style="font-size: 12px; color: #B0A49B">Mono 400 · 13 / 1.6</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Buttons, nav, breadcrumb, inputs.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-size: 13px; line-height: 1.6">Generate recipe</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">meta</div>
+            <div style="font-size: 12px; color: #B0A49B">Mono 400 · 12 / 1.6</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Chips, table cells, captions.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-size: 12px; line-height: 1.6">Vegan and gluten free</div>
+          </div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.5fr) minmax(0, 0.42fr) minmax(0, 1.4fr); background: #372F2A; align-items: stretch">
+          <div style="background: #2A2421; padding: 20px; display: flex; flex-direction: column; gap: 6px">
+            <div style="font-size: 13px; color: #F0EDE4; letter-spacing: .06em">eyebrow</div>
+            <div style="font-size: 12px; color: #B0A49B">Mono 400 · 11 / 0.18em / caps</div>
+          </div>
+          <div style="background: #2A2421; padding: 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Section eyebrows, field labels.</div>
+          <div style="background: #2A2421; padding: 20px; display: flex; align-items: center; overflow: hidden">
+            <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase">INGREDIENTS</div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <section style="padding-bottom: clamp(96px, 12vw, 176px)">
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: baseline; justify-content: space-between; margin-bottom: 40px">
+        <h2 style="font-family: 'Chathura', sans-serif; font-weight: 400; font-size: clamp(41px, 5.9vw, 65px); margin: 0; letter-spacing: -.01em">Spacing</h2>
+        <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">Base 8 &nbsp;/&nbsp; 4px half-step</div>
+      </div>
+      <p style="font-size: 14px; line-height: 1.7; color: #B0A49B; max-width: 62ch; margin: 0 0 48px">Nine steps. Inside a component use 04–16; between components 24–48; between sections 96–176. Gaps are always set with flex or grid <code style="color: #C07000">gap</code>, never per-element margins.</p>
+      <div style="display: flex; flex-direction: column; gap: 1px; background: #372F2A">
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-04</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 4px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Caret and inline glyph offsets</div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-08</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 8px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Stacked lines, chip-to-chip in a dense row</div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-12</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 12px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Chip rows, button rows, breadcrumb items</div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-16</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 16px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Field padding, label-to-value</div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-24</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 24px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Inside a panel, block to block</div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-32</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 32px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Panel padding, nav item spacing</div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-48</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 48px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Component group to component group</div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-96</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 96px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Section to section, minimum</div>
+        </div>
+
+        <div style="display: grid; gap: 1px; grid-template-columns: minmax(0, 0.34fr) minmax(0, 1.1fr) minmax(0, 1fr); background: #372F2A; align-items: center">
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 13px; color: #F0EDE4">space-176</div>
+          <div style="background: #2A2421; padding: 14px 20px; display: flex; align-items: center"><div style="height: 12px; background: #C07000; width: 176px"></div></div>
+          <div style="background: #2A2421; padding: 14px 20px; font-size: 12px; line-height: 1.6; color: #B0A49B">Section to section at full width</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section style="padding-bottom: clamp(96px, 12vw, 176px)">
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: baseline; justify-content: space-between; margin-bottom: 40px">
+        <h2 style="font-family: 'Chathura', sans-serif; font-weight: 400; font-size: clamp(41px, 5.9vw, 65px); margin: 0; letter-spacing: -.01em">Depth &amp; motion</h2>
+        <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">The liminal layer</div>
+      </div>
+      <div style="display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 300px), 1fr))">
+        <div style="background: #2A2421; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px">
+          <div style="position: relative; height: 200px; background: #241E1B; overflow: hidden; display: flex; align-items: center; justify-content: center">
+            <div style="position: absolute; width: 150px; height: 116px; background: #F0EDE4; filter: blur(10px); opacity: .3; transform: translate(-14px, -46px)"></div>
+            <div style="position: absolute; width: 172px; height: 130px; background: #F0EDE4; filter: blur(4px); opacity: .5; transform: translate(4px, -18px)"></div>
+            <div style="position: relative; width: 190px; height: 128px; background: #F0EDE4; box-shadow: 0 24px 60px rgba(0,0,0,.45); display: flex; flex-direction: column; justify-content: center; gap: 8px; padding: 0 18px">
+              <div style="font-family: 'Chathura', sans-serif; font-size: 19px; letter-spacing: .12em; color: #141110">IN FOCUS</div>
+              <div style="height: 1px; background: #C9C3B7"></div>
+              <div style="font-size: 10px; color: #4A423C">BATCH NO. <span style="color: #C43D2E">007</span></div>
+            </div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 22px; letter-spacing: .16em; text-transform: uppercase">Depth stack</div>
+            <div style="font-size: 13px; line-height: 1.7; color: #B0A49B">Adjacent items sit behind the focused one, offset and progressively blurred: blur 4px at 50% opacity, then 10px at 30%. Maximum two layers back. Depth replaces pagination — the stack shows where you are.</div>
+          </div>
+        </div>
+        <div style="background: #2A2421; padding: 32px 28px; display: flex; flex-direction: column; gap: 24px">
+          <div style="position: relative; height: 200px; background: #241E1B; overflow: hidden">
+            <div style="position: absolute; inset: 0; background: radial-gradient(70% 60% at 50% 50%, rgba(181,164,55,.22), rgba(181,164,55,0) 70%)"></div>
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 12px; letter-spacing: .18em; text-transform: uppercase; color: #F0EDE4">Glow · 6s breathe</div>
+          </div>
+          <div style="display: flex; flex-direction: column; gap: 12px">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 22px; letter-spacing: .16em; text-transform: uppercase">Motion tokens</div>
+            <div style="display: flex; flex-direction: column; gap: 10px">
+              <div style="display: flex; gap: 16px; font-size: 12px"><span style="color: #F0EDE4; min-width: 128px">ease-liminal</span><span style="color: #B0A49B">cubic-bezier(.22,.61,.36,1)</span></div>
+              <div style="display: flex; gap: 16px; font-size: 12px"><span style="color: #F0EDE4; min-width: 128px">dur-enter</span><span style="color: #B0A49B">600ms — surfaces arriving</span></div>
+              <div style="display: flex; gap: 16px; font-size: 12px"><span style="color: #F0EDE4; min-width: 128px">dur-state</span><span style="color: #B0A49B">400ms — hover, focus, fills</span></div>
+              <div style="display: flex; gap: 16px; font-size: 12px"><span style="color: #F0EDE4; min-width: 128px">dur-resolve</span><span style="color: #B0A49B">900ms — blur to focus</span></div>
+              <div style="display: flex; gap: 16px; font-size: 12px"><span style="color: #F0EDE4; min-width: 128px">glow-breathe</span><span style="color: #B0A49B">6s, opacity .45→.80</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section style="padding-bottom: clamp(96px, 12vw, 176px)">
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: baseline; justify-content: space-between; margin-bottom: 36px">
+        <h2 style="font-family: 'Chathura', sans-serif; font-weight: 400; font-size: clamp(41px, 5.9vw, 65px); margin: 0; letter-spacing: -.01em">Components</h2>
+        <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">Seven patterns</div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 1px; background: #372F2A">
+
+        <div style="background: #2A2421; padding: 40px clamp(24px, 4vw, 40px)">
+          <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 28px">Navigation &amp; breadcrumb</div>
+          <div style="background: #241E1B; padding: 28px clamp(20px, 3vw, 32px); display: flex; flex-direction: column; gap: 40px">
+            <div style="display: flex; flex-wrap: wrap; gap: 32px; align-items: baseline; justify-content: space-between">
+              <div style="font-family: 'Chathura', sans-serif; font-size: 21px; letter-spacing: .24em; text-transform: uppercase">Recidex</div>
+              <div style="display: flex; gap: 40px; font-size: 13px">
+                <div style="color: #F0EDE4">+ Add new</div>
+                <div style="color: #F0EDE4">Library</div>
+              </div>
+            </div>
+            <div style="display: flex; flex-wrap: wrap; gap: 12px; font-size: 13px; color: #B0A49B">
+              <span>Library</span><span>&gt;</span><span>Desserts</span><span>&gt;</span><span style="color: #F0EDE4">Almond Sea Salt</span>
+            </div>
+          </div>
+          <div style="font-size: 13px; line-height: 1.7; color: #B0A49B; margin-top: 24px; max-width: 68ch">Nav is 13px mono, uncased, spaced at 40px. The wordmark is the only tracked-out element. Breadcrumb uses <code style="color: #C07000">&gt;</code> separators in tint; the current node is paper. No underlines at rest — hover shifts the item to orange over 400ms.</div>
+        </div>
+
+        <div style="background: #2A2421; padding: 40px clamp(24px, 4vw, 40px)">
+          <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 28px">Buttons</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 28px">
+            <div style="background: #F0EDE4; color: #141110; border-radius: 5px; padding: 14px 28px; font-size: 13px; letter-spacing: .04em; cursor: pointer; transition: background 400ms cubic-bezier(.22,.61,.36,1)" style-hover="background: #FFFFFF">Generate recipe</div>
+            <div style="background: #473D36; color: #F0EDE4; border-radius: 5px; padding: 14px 28px; font-size: 13px; letter-spacing: .04em; cursor: pointer; transition: background 400ms cubic-bezier(.22,.61,.36,1)" style-hover="background: #5A4E45">Save to…</div>
+            <div style="background: transparent; color: #F0EDE4; border-radius: 5px; padding: 14px 20px; font-size: 13px; letter-spacing: .04em; cursor: pointer; transition: color 400ms cubic-bezier(.22,.61,.36,1)" style-hover="color: #C07000">Duplicate</div>
+            <div style="background: #372F2A; color: #B0A49B; border-radius: 5px; padding: 14px 28px; font-size: 13px; letter-spacing: .04em">Disabled</div>
+          </div>
+          <div style="display: grid; gap: 20px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr)); font-size: 12px; line-height: 1.7; color: #B0A49B">
+            <div><span style="color: #F0EDE4">Primary</span> — paper fill, ink text. One per view; reserved for generation and commit.</div>
+            <div><span style="color: #F0EDE4">Secondary</span> — brown-30 fill, paper text. Any number.</div>
+            <div><span style="color: #F0EDE4">Quiet</span> — no fill. Inline row actions; hover to orange.</div>
+            <div><span style="color: #F0EDE4">All</span> — 14/28 padding, 5px corners, no border, no shadow, no icon unless the label is a file action.</div>
+          </div>
+        </div>
+
+        <div style="background: #2A2421; padding: 40px clamp(24px, 4vw, 40px)">
+          <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 28px">Tags &amp; chips</div>
+          <div style="display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 28px; align-items: center">
+            <div style="background: #C07000; color: #141110; border-radius: 5px; padding: 9px 16px; font-size: 12px; letter-spacing: .04em">Seasoning</div>
+            <div style="background: #C07000; color: #141110; border-radius: 5px; padding: 9px 16px; font-size: 12px; letter-spacing: .04em">Hot/Cold</div>
+            <div style="background: #473D36; color: #F0EDE4; border-radius: 5px; padding: 9px 16px; font-size: 12px; letter-spacing: .04em; cursor: pointer; transition: background 400ms cubic-bezier(.22,.61,.36,1)" style-hover="background: #5A4E45">Vegan</div>
+            <div style="background: #473D36; color: #F0EDE4; border-radius: 5px; padding: 9px 16px; font-size: 12px; letter-spacing: .04em; cursor: pointer; transition: background 400ms cubic-bezier(.22,.61,.36,1)" style-hover="background: #5A4E45">Gluten free</div>
+            <div style="display: flex; align-items: center; gap: 10px; font-size: 12px; color: #B0A49B; margin-left: 8px"><span style="width: 7px; height: 7px; border-radius: 50%; background: #C43D2E; display: inline-block"></span>Active in stack</div>
+          </div>
+          <div style="font-size: 13px; line-height: 1.7; color: #B0A49B; max-width: 68ch">Applied tags are orange with ink text. Available-but-unapplied filters are brown-30 with paper text. 9/16 padding, 12px mono, 5px corners. Chips never carry a count badge or a remove ✕ — removal happens by clicking the chip.</div>
+        </div>
+
+        <div style="background: #2A2421; padding: 40px clamp(24px, 4vw, 40px)">
+          <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 28px">Inputs &amp; search</div>
+          <div style="display: flex; flex-direction: column; gap: 20px; max-width: 560px; margin-bottom: 28px">
+            <div style="background: #241E1B; padding: 16px 20px; font-size: 14px; color: #B0A49B">Search the library…</div>
+            <div style="background: #241E1B; padding: 16px 20px; font-size: 14px; color: #F0EDE4; box-shadow: inset 0 -2px 0 0 #C07000; display: flex; gap: 2px; align-items: center">Almond sea salt<span style="width: 8px; height: 17px; background: #C07000; animation: caret 1.1s step-end infinite; display: inline-block"></span></div>
+            <div style="background: #241E1B; padding: 16px 20px; font-size: 14px; color: #B0A49B; display: flex; flex-direction: column; gap: 10px">
+              <span style="font-size: 11px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">Constraints</span>
+              <span style="color: #F0EDE4">no dairy, under 40 minutes</span>
+            </div>
+          </div>
+          <div style="font-size: 13px; line-height: 1.7; color: #B0A49B; max-width: 68ch">Fields are brown-10 wells with no outline. Focus adds a 2px orange underline inset — the only focus indicator in the system, applied identically to buttons and chips. Placeholders are tint; entered values are paper. Labels sit inside the well as 11px uppercase, not above it.</div>
+        </div>
+
+        <div style="background: #2A2421; padding: 40px clamp(24px, 4vw, 40px)">
+          <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 28px">Generating state</div>
+          <div style="background: #241E1B; padding: clamp(24px, 4vw, 40px); display: flex; flex-direction: column; gap: 20px; min-height: 220px">
+            <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000">Composing · batch 008</div>
+            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; line-height: 1.6; min-height: 96px">
+              <sc-for list="{{ tickerLines }}" as="line" hint-placeholder-count="2">
+                <div style="color: #B0A49B">{{ line }}</div>
+              </sc-for>
+              <div style="display: flex; gap: 6px; align-items: center; color: #F0EDE4">{{ tickerActive }}<span style="width: 8px; height: 16px; background: #F0EDE4; animation: caret 1.1s step-end infinite; display: inline-block"></span></div>
+            </div>
+          </div>
+          <div style="font-size: 13px; line-height: 1.7; color: #B0A49B; margin-top: 24px; max-width: 68ch">No spinner, no progress bar, no percentage. Lines stream in mono at tint, rising 6px over 600ms; the live line is paper with a blinking caret. The label names the batch so the wait has an identity. When generation completes the block cross-fades to the paper card over 900ms.</div>
+        </div>
+
+        <div style="background: #2A2421; padding: 40px clamp(24px, 4vw, 40px)">
+          <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 28px">Modal / overlay</div>
+          <div style="position: relative; background: #241E1B; min-height: 300px; overflow: hidden; display: flex; align-items: center; justify-content: center; padding: 32px">
+            <div style="position: absolute; inset: 0; padding: 28px; filter: blur(6px); opacity: .55">
+              <div style="font-size: 13px; color: #B0A49B; line-height: 1.9">Library &gt; Desserts &gt; Almond Sea Salt<br />Step 1 — in velit qui eligendi pariatur cumque<br />Step 2 — lorem ipsum dolor sit amet consectetur<br />Step 3 — dolor pariatur do quidem libero autem</div>
+            </div>
+            <div style="position: absolute; inset: 0; background: rgba(30,25,23,.62)"></div>
+            <div style="position: relative; background: #F0EDE4; width: min(100%, 420px); padding: 32px 28px; display: flex; flex-direction: column; gap: 24px; box-shadow: 0 32px 80px rgba(0,0,0,.5)">
+              <div style="font-family: 'Chathura', sans-serif; font-size: 33px; color: #141110; line-height: 1.2">Save to a collection</div>
+              <div style="font-size: 13px; line-height: 1.7; color: #4A423C">Almond Sea Salt, batch <span style="color: #C43D2E">007</span>, will be filed under the collection you choose.</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 12px">
+                <div style="background: #C07000; color: #141110; border-radius: 5px; padding: 9px 16px; font-size: 12px">Desserts</div>
+                <div style="background: #E2DED2; color: #141110; padding: 9px 16px; font-size: 12px">Weeknight</div>
+                <div style="background: #E2DED2; color: #141110; padding: 9px 16px; font-size: 12px">Archive</div>
+              </div>
+              <div style="display: flex; gap: 12px; margin-top: 8px">
+                <div style="background: #141110; color: #F0EDE4; padding: 13px 24px; font-size: 13px; cursor: pointer">Save</div>
+                <div style="color: #4A423C; padding: 13px 12px; font-size: 13px; cursor: pointer">Cancel</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 13px; line-height: 1.7; color: #B0A49B; margin-top: 24px; max-width: 68ch">Modals are paper on a blurred, veiled page — the same depth language as the card stack, not a separate scrim treatment. Page content blurs 6px; the veil is brown-05 at 62%. On paper the roles invert: ink fills the primary button, and secondary chips use a paper shade rather than brown.</div>
+        </div>
+
+        <div style="background: #2A2421; padding: 40px clamp(24px, 4vw, 40px)">
+          <div style="font-size: 11px; letter-spacing: .18em; text-transform: uppercase; color: #C07000; margin-bottom: 28px">Empty state</div>
+          <div style="position: relative; background: #241E1B; min-height: 300px; overflow: hidden; display: flex; align-items: center; padding: clamp(28px, 5vw, 64px)">
+            <div style="position: absolute; inset: 0; background: radial-gradient(60% 60% at 72% 50%, rgba(181,164,55,.14), rgba(181,164,55,0) 70%)"></div>
+            <div style="position: relative; display: flex; flex-direction: column; gap: 24px; max-width: 420px">
+              <div style="font-family: 'Chathura', sans-serif; font-size: clamp(36px, 5.0vw, 50px); line-height: 1.14; color: #F0EDE4">Nothing here yet.</div>
+              <div style="font-size: 13px; line-height: 1.7; color: #B0A49B">The library fills as you generate. Describe a dish, an ingredient you have too much of, or a constraint.</div>
+              <div style="display: flex; flex-wrap: wrap; gap: 12px; align-items: center">
+                <div style="background: #F0EDE4; color: #141110; border-radius: 5px; padding: 14px 28px; font-size: 13px; cursor: pointer">Generate recipe</div>
+                <div style="color: #F0EDE4; padding: 14px 12px; font-size: 13px; cursor: pointer">Import</div>
+              </div>
+            </div>
+          </div>
+          <div style="font-size: 13px; line-height: 1.7; color: #B0A49B; margin-top: 24px; max-width: 68ch">Empty states are off-center and mostly space, with a single soft glow standing in for the absent artifact. Display line, one line of mono, one primary action. No illustration, no icon, no bordered dropzone.</div>
+        </div>
+
+      </div>
+    </section>
+
+    <section>
+      <div style="display: flex; flex-wrap: wrap; gap: 24px; align-items: baseline; justify-content: space-between; margin-bottom: 40px">
+        <h2 style="font-family: 'Chathura', sans-serif; font-weight: 400; font-size: clamp(41px, 5.9vw, 65px); margin: 0; letter-spacing: -.01em">Rules</h2>
+        <div style="font-size: 12px; letter-spacing: .16em; text-transform: uppercase; color: #B0A49B">Non-negotiable</div>
+      </div>
+      <div style="display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); background: #372F2A">
+        <sc-for list="{{ rules }}" as="r" hint-placeholder-count="6">
+          <div style="background: #2A2421; padding: 28px 24px; display: flex; flex-direction: column; gap: 14px">
+            <div style="font-family: 'Chathura', sans-serif; font-size: 19px; letter-spacing: .16em; text-transform: uppercase; color: #C07000">{{ r.n }}</div>
+            <div style="font-size: 13px; line-height: 1.7; color: #F0EDE4">{{ r.text }}</div>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;showLightTokens&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Content&quot;},&quot;tickerSpeed&quot;:{&quot;editor&quot;:&quot;range&quot;,&quot;default&quot;:900,&quot;min&quot;:400,&quot;max&quot;:2000,&quot;step&quot;:100,&quot;unit&quot;:&quot;ms&quot;,&quot;tsType&quot;:&quot;number&quot;,&quot;section&quot;:&quot;Motion&quot;}}">
+const SCRIPT = [
+  "reading 412 desserts for almond + salt affinity",
+  "cacao 89% single origin — bittersweet base locked",
+  "salt applied as finish, not in dough",
+  "resting time 40 min · yield 60 grams",
+  "batch 008 composed"
+];
+
+class Component extends DCLogic {
+  state = { lines: [], active: "" };
+
+  componentDidMount() {
+    let i = 0;
+    this.t = setInterval(() => {
+      if (i >= SCRIPT.length) { i = 0; this.setState({ lines: [], active: "" }); return; }
+      const next = SCRIPT[i];
+      this.setState(s => ({ lines: [...s.lines, s.active].filter(Boolean).slice(-3), active: next }));
+      i++;
+    }, this.props.tickerSpeed ?? 900);
+  }
+
+  componentWillUnmount() { clearInterval(this.t); }
+
+  renderVals() {
+    if (!this._s) this._s = {
+      lightRows: [
+        { role: "Page ground", dark: "brown-05  #1E1917", light: "paper  #F0EDE4" },
+        { role: "Panel / cell", dark: "brown-10  #2A2421", light: "paper-dim  #E2DED2" },
+        { role: "Divider gap", dark: "brown-20  #372F2A", light: "paper-edge  #D2CDBF" },
+        { role: "Secondary fill", dark: "brown-30  #473D36", light: "paper-edge  #D2CDBF" },
+        { role: "Hover surface", dark: "brown-40  #5A4E45", light: "paper-warm  #C9C3B7" },
+        { role: "Primary text", dark: "paper  #F0EDE4", light: "ink  #141110" },
+        { role: "Secondary text", dark: "tint  #B0A49B", light: "ink-soft  #4A423C" },
+        { role: "Primary button", dark: "paper on ink text", light: "ink on paper text" },
+        { role: "Accent · interaction", dark: "orange  #C07000", light: "orange  #C07000" },
+        { role: "Accent · marker", dark: "red  #C43D2E", light: "red  #C43D2E" }
+      ],
+      typeRows: [
+        { token: "display-xl", spec: "Chathura 76 / 1.04 / -1%", use: "Page opener. One per view.", sample: "Almond Sea Salt", style: "font-family: 'Chathura', sans-serif; font-size: 40px; line-height: 1.04; white-space: nowrap" },
+        { token: "display-lg", spec: "Chathura 44 / 1.1 / -1%", use: "Recipe title, section head.", sample: "Instructions", style: "font-family: 'Chathura', sans-serif; font-size: 30px; line-height: 1.1" },
+        { token: "display-sm", spec: "Chathura 22 / 1.2", use: "Modal title, card head.", sample: "Save to a collection", style: "font-family: 'Chathura', sans-serif; font-size: 20px; line-height: 1.2" },
+        { token: "label", spec: "Chathura 13 / 0.2em / caps", use: "Wordmark, card labels.", sample: "BATCH NO. 007", style: "font-family: 'Chathura', sans-serif; font-size: 13px; letter-spacing: .2em" },
+        { token: "body-lg", spec: "Mono 300 · 15 / 1.75", use: "Intro copy, step text.", sample: "Toast the almonds before folding.", style: "font-size: 15px; font-weight: 300; line-height: 1.75" },
+        { token: "body", spec: "Mono 400 · 14 / 1.7", use: "Default running text.", sample: "60 grams · 40 minutes · yield 8", style: "font-size: 14px; line-height: 1.7" },
+        { token: "ui", spec: "Mono 400 · 13 / 1.6", use: "Buttons, nav, breadcrumb, inputs.", sample: "Generate recipe", style: "font-size: 13px; line-height: 1.6" },
+        { token: "meta", spec: "Mono 400 · 12 / 1.6", use: "Chips, table cells, captions.", sample: "Vegan and gluten free", style: "font-size: 12px; line-height: 1.6" },
+        { token: "eyebrow", spec: "Mono 400 · 11 / 0.18em / caps", use: "Section eyebrows, field labels.", sample: "INGREDIENTS", style: "font-size: 11px; letter-spacing: .18em; text-transform: uppercase" }
+      ],
+      spaceRows: [
+        { token: "space-04", px: "4px", use: "Caret and inline glyph offsets" },
+        { token: "space-08", px: "8px", use: "Stacked lines, chip-to-chip in a dense row" },
+        { token: "space-12", px: "12px", use: "Chip rows, button rows, breadcrumb items" },
+        { token: "space-16", px: "16px", use: "Field padding, label-to-value" },
+        { token: "space-24", px: "24px", use: "Inside a panel, block to block" },
+        { token: "space-32", px: "32px", use: "Panel padding, nav item spacing" },
+        { token: "space-48", px: "48px", use: "Component group to component group" },
+        { token: "space-96", px: "96px", use: "Section to section, minimum" },
+        { token: "space-176", px: "176px", use: "Section to section at full width" }
+      ],
+      rules: [
+        { n: "R1", text: "No borders. No outlines, no 1px strokes. Separation is surface value, blur, or space. Buttons and tags carry a 5px radius; every other surface is square." },
+        { n: "R2", text: "Paper only where a recipe lives. If a surface is off-white and is not an artifact, it is wrong." },
+        { n: "R3", text: "One red per viewport. It marks identity or position, never state or danger." },
+        { n: "R4", text: "One primary button per view, and it is paper. Orange is interaction feedback, not a call to action." },
+        { n: "R5", text: "Text is never set with opacity. Use paper, tint or ink — the three defined text values." },
+        { n: "R6", text: "No spinners, no progress bars, no percentages. Waiting is expressed as streaming mono and breathing glow." },
+        { n: "R7", text: "Every gap comes from the spacing scale via flex or grid gap. No arbitrary margins." },
+        { n: "R8", text: "Layouts are off-center. Content sits in a column offset from the page, with the long edge left open." }
+      ]
+    };
+    return Object.assign({
+      showLight: this.props.showLightTokens ?? true,
+      tickerLines: this.state.lines,
+      tickerActive: this.state.active
+    }, this._s);
+  }
+}
+</script>
+</body>
+</html>

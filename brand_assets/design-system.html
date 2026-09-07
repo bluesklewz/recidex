@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Recidex — Design System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chathura:wght@400;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  /* This page is the rendered Recidex spec. Its tokens mirror index.html's :root 1:1.
+     Source of truth for the canvas version: "Recidex Design System.dc.html". */
+  :root{
+    --brown-05:#1E1917; --brown-10:#2A2421; --brown-20:#372F2A;
+    --brown-30:#473D36; --brown-40:#5A4E45;
+    --paper:#F0EDE4; --ink:#141110; --paper-edge:#C9C3B7;
+    --ink-soft:#4A423C; --tint:#B0A49B;
+    --orange:#C07000; --red:#C43D2E;
+    --font-display:'Chathura','Trebuchet MS',sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+    --ease-liminal:cubic-bezier(.22,.61,.36,1);
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--brown-05); color:var(--paper);
+    font-family:var(--font-mono); font-weight:400; font-size:14px; line-height:1.7;
+    -webkit-font-smoothing:antialiased; overflow-x:hidden;
+  }
+  body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0}
+  body::before{background:radial-gradient(120% 80% at 18% 4%,#5A4E45 0%,#3A312C 34%,#251F1C 68%,#1E1917 100%)}
+  body::after{
+    background:radial-gradient(60% 40% at 78% 22%,rgba(181,164,55,.10),rgba(181,164,55,0) 70%);
+    animation:breathe 6s var(--ease-liminal) infinite;
+  }
+  @keyframes breathe{0%,100%{opacity:.55}50%{opacity:1}}
+  @keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+  @media (prefers-reduced-motion:reduce){ body::after{animation:none} }
+
+  .wrap{position:relative;z-index:1;max-width:1180px;margin:0 auto;
+    padding:clamp(48px,7vw,96px) clamp(24px,5vw,96px) 176px}
+
+  /* Chathura line-height is pulled tight to 0.6 across every display usage */
+  h1,h2{font-family:var(--font-display);font-weight:400;letter-spacing:-.01em;line-height:.6}
+  h1{font-size:clamp(59px,9.6vw,112px);margin:0 0 32px;max-width:17ch;text-wrap:pretty}
+  h2{font-size:clamp(41px,5.9vw,65px)}
+  h3{font-family:var(--font-display);font-weight:400;font-size:22px;line-height:.6;letter-spacing:.16em;text-transform:uppercase}
+
+  .eyebrow{font-family:var(--font-mono);font-size:11px;font-weight:400;
+    letter-spacing:.18em;text-transform:uppercase;color:var(--orange)}
+  .note{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--tint)}
+  .p{font-size:14px;line-height:1.7;color:var(--tint);max-width:64ch;margin:0 0 32px}
+  .p code{color:var(--orange);font-family:var(--font-mono);font-size:.92em}
+
+  header.doc{display:flex;flex-wrap:wrap;gap:32px;justify-content:space-between;align-items:baseline}
+  .wordmark{font-family:var(--font-display);font-size:22px;line-height:.6;letter-spacing:.28em;text-transform:uppercase}
+
+  .hero{max-width:760px;margin-left:auto;padding:clamp(96px,14vw,200px) 0 clamp(64px,8vw,128px)}
+  .hero .eyebrow{display:block;margin-bottom:32px}
+  .lede{font-size:15px;font-weight:300;line-height:1.75;color:var(--tint);max-width:62ch;text-wrap:pretty}
+
+  section{padding-bottom:clamp(96px,12vw,176px)}
+  .sec-head{display:flex;flex-wrap:wrap;gap:24px;align-items:baseline;
+    justify-content:space-between;margin-bottom:56px}
+
+  /* cells separated by 1px brown gaps — a gap the ground shows through, not a stroke */
+  .cells{display:grid;gap:1px;background:var(--brown-20)}
+  .auto{grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))}
+  .cell{background:var(--brown-10);padding:32px 28px;display:flex;flex-direction:column;gap:14px}
+  .cell p{font-size:13px;line-height:1.7;color:var(--paper)}
+  .flow{display:flex;flex-direction:column;gap:1px;background:var(--brown-20)}
+  .flow > .cell{padding:40px clamp(24px,4vw,40px);gap:24px}
+
+  /* swatches */
+  .ramp{display:grid;gap:1px;grid-template-columns:repeat(auto-fit,minmax(min(100%,176px),1fr));
+    background:var(--brown-20);margin-bottom:64px}
+  .sw{padding:24px 20px;min-height:172px;display:flex;flex-direction:column;justify-content:space-between}
+  .sw .name{font-size:12px;letter-spacing:.12em}
+  .sw .hex{font-size:12px;color:var(--tint)}
+  .sw .use{font-size:12px;line-height:1.5;color:var(--tint);margin-top:6px}
+
+  .accent-grid{display:grid;gap:1px;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));
+    background:var(--brown-20)}
+  .accent{background:var(--brown-10);padding:32px 28px;display:flex;flex-direction:column;gap:20px}
+  .accent .chip{height:80px}
+  .accent p{font-size:13px;line-height:1.7;color:var(--tint)}
+
+  /* tables — cells on 1px gaps, same language as .cells */
+  .tbl{width:100%;border-collapse:separate;border-spacing:1px;background:var(--brown-20);margin-bottom:8px}
+  .tbl th,.tbl td{background:var(--brown-10);padding:16px 20px;text-align:left;
+    font-weight:400;vertical-align:baseline}
+  .tbl th{font-size:11px;letter-spacing:.16em;text-transform:uppercase;color:var(--orange)}
+  .tbl td{font-size:13px;color:var(--tint)}
+  .tbl td.k{color:var(--paper)}
+  .tbl td .sample{color:var(--paper)}
+  .bar{height:12px;background:var(--orange);display:inline-block;vertical-align:middle}
+
+  /* component demos */
+  .demo{background:#241E1B;padding:clamp(20px,3vw,32px);margin-top:24px;
+    display:flex;flex-wrap:wrap;gap:16px;align-items:center}
+  .btn{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;
+    padding:14px 28px;border-radius:5px;display:inline-block}
+  .btn.primary{background:var(--paper);color:var(--ink)}
+  .btn.secondary{background:var(--brown-30);color:var(--paper)}
+  .btn.quiet{background:transparent;color:var(--paper);padding:14px 20px}
+  .btn.disabled{background:var(--brown-20);color:var(--tint)}
+  .tag{font-family:var(--font-mono);font-size:8px;line-height:1.3;letter-spacing:.04em;
+    padding:2px 6px;border-radius:5px;display:inline-block}
+  .tag.on{background:var(--orange);color:var(--ink)}
+  .tag.off{background:var(--brown-30);color:var(--paper)}
+  .well{background:#241E1B;padding:16px 20px;font-size:14px;color:var(--tint);width:100%;max-width:520px}
+  .well.typing{color:var(--paper);box-shadow:inset 0 -2px 0 0 var(--orange)}
+  .caret{display:inline-block;width:8px;height:15px;background:var(--orange);
+    animation:caret 1.1s step-end infinite;vertical-align:-2px;margin-left:2px}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--red);vertical-align:1px}
+
+  .paper-card{background:var(--paper);color:var(--ink);padding:28px 24px;
+    box-shadow:0 24px 60px rgba(0,0,0,.45);max-width:420px}
+  .paper-card h3{font-family:var(--font-display);font-weight:400;font-size:33px;
+    letter-spacing:0;text-transform:none;line-height:.6;color:var(--ink);margin-bottom:16px}
+  .paper-card p{font-size:13px;line-height:1.7;color:var(--ink-soft)}
+  .paper-rule{height:1px;background:var(--paper-edge);margin:16px 0}
+
+  .rules{display:grid;gap:1px;grid-template-columns:repeat(auto-fit,minmax(min(100%,280px),1fr));
+    background:var(--brown-20)}
+  .rule-cell{background:var(--brown-10);padding:28px 24px;display:flex;flex-direction:column;gap:14px}
+  .rule-cell .n{font-family:var(--font-display);font-size:19px;line-height:.6;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--orange)}
+  .rule-cell p{font-size:13px;line-height:1.7;color:var(--paper)}
+
+  .mtok{display:flex;gap:16px;font-size:12px;padding:4px 0}
+  .mtok b{color:var(--paper);font-weight:400;min-width:132px}
+  .mtok span{color:var(--tint)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="doc">
+    <div class="wordmark">Recidex</div>
+    <div class="note">Design System &nbsp;/&nbsp; v1.0 &nbsp;/&nbsp; implemented in index.html</div>
+  </header>
+
+  <div class="hero">
+    <span class="eyebrow">Foundation</span>
+    <h1>A system for the moment before the recipe exists.</h1>
+    <p class="lede">Recidex generates recipes. The interface holds a threshold: something is
+      arriving, not yet resolved. Depth blur, unhurried transitions and a single warm ground
+      carry that state. Everything else is stripped to monospace and space.</p>
+  </div>
+
+  <section>
+    <div class="cells auto">
+      <div class="cell"><span class="eyebrow">01 — Ground</span><p>Brown is the room. It is never a
+        component fill — only the space components sit in.</p></div>
+      <div class="cell"><span class="eyebrow">02 — No borders</span><p>Nothing is outlined.
+        Separation comes from surface value, blur and space — never a stroke.</p></div>
+      <div class="cell"><span class="eyebrow">03 — Paper is content</span><p>Off-white appears only
+        where a recipe does. It marks the artifact, not the chrome.</p></div>
+      <div class="cell"><span class="eyebrow">04 — Slow</span><p>Transitions run 400–900ms on a soft
+        ease. Nothing snaps. Nothing spins.</p></div>
+    </div>
+  </section>
+
+  <section id="color">
+    <div class="sec-head"><h2>Color</h2><div class="note">Five families. No sixth.</div></div>
+
+    <span class="eyebrow">Primary — Brown ramp</span>
+    <p class="p" style="margin-top:24px">Five steps, used as elevation. Lower numbers sit further
+      back. Step 40 is the only step that may appear as a hover or pressed surface; steps 05–20 are
+      grounds and panels. Brown is never used for text.</p>
+    <div class="ramp">
+      <div class="sw" style="background:#1E1917"><div class="name">brown-05</div>
+        <div><div class="hex">#1E1917</div><div class="use">Page base, behind the glow</div></div></div>
+      <div class="sw" style="background:#2A2421"><div class="name">brown-10</div>
+        <div><div class="hex">#2A2421</div><div class="use">Panels, cells, inputs at rest</div></div></div>
+      <div class="sw" style="background:#372F2A"><div class="name">brown-20</div>
+        <div><div class="hex">#372F2A</div><div class="use">Divider gaps, modal veil</div></div></div>
+      <div class="sw" style="background:#473D36"><div class="name">brown-30</div>
+        <div><div class="hex">#473D36</div><div class="use">Secondary button, chips at rest</div></div></div>
+      <div class="sw" style="background:#5A4E45"><div class="name">brown-40</div>
+        <div><div class="hex">#5A4E45</div><div class="use">Hover and pressed surfaces only</div></div></div>
+    </div>
+
+    <span class="eyebrow">Neutral — Paper, ink, tint</span>
+    <p class="p" style="margin-top:24px">Paper is the recipe artifact and nothing else — cards,
+      sheets, print. Ink is the only text color allowed on paper. Tint is the single muted text value
+      on brown; there is no opacity-based text in this system.</p>
+    <div class="ramp" style="grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr))">
+      <div class="sw" style="background:#F0EDE4;color:#141110"><div class="name">Paper</div>
+        <div><div class="hex" style="color:#141110">#F0EDE4</div>
+        <div class="use" style="color:#4A423C">Recipe cards, sheets, modals. Primary text on brown.</div></div></div>
+      <div class="sw" style="background:#141110"><div class="name">Ink</div>
+        <div><div class="hex">#141110</div><div class="use">All type on paper. Never a page ground.</div></div></div>
+      <div class="sw" style="background:#2A2421"><div class="name">Tint</div>
+        <div><div class="hex">#B0A49B</div><div class="use">Secondary text, labels, placeholders on brown.</div></div></div>
+      <div class="sw" style="background:#2A2421"><div class="name">Paper-edge</div>
+        <div><div class="hex">#C9C3B7</div><div class="use">Fine structural rules inside a paper artifact.</div></div></div>
+    </div>
+
+    <span class="eyebrow">Accent — Orange and red</span>
+    <div class="accent-grid" style="margin-top:24px">
+      <div class="accent">
+        <div class="chip" style="background:#C07000"></div>
+        <h3>Orange &nbsp;#C07000</h3>
+        <p>Interaction. Filled tags and metadata chips, focus rings, selected states, section
+          eyebrows. Carries ink text when filled, never paper. Not a primary-action color —
+          generate is a paper button.</p>
+      </div>
+      <div class="accent">
+        <div class="chip" style="background:#C43D2E"></div>
+        <h3>Red &nbsp;#C43D2E</h3>
+        <p>Rare marker. Batch and ID numerals, the active dot in a stack, one point of emphasis per
+          view. Not destructive, not error, not a fill larger than 24px. If red appears twice in a
+          viewport, one use is wrong.</p>
+      </div>
+    </div>
+  </section>
+
+  <section id="light">
+    <div class="sec-head"><h2>Light variant</h2><div class="note">Token table only</div></div>
+    <p class="p">Roles flip; hues do not. Paper becomes the ground and the brown ramp inverts, so ink
+      carries body copy. Accents are unchanged — orange keeps ink text, red keeps its scarcity rule.</p>
+    <table class="tbl">
+      <tr><th>Role</th><th>Dark</th><th>Light</th></tr>
+      <tr><td class="k">Page ground</td><td>brown-05 &nbsp;#1E1917</td><td>paper &nbsp;#F0EDE4</td></tr>
+      <tr><td class="k">Panel / cell</td><td>brown-10 &nbsp;#2A2421</td><td>paper-dim &nbsp;#E2DED2</td></tr>
+      <tr><td class="k">Divider gap</td><td>brown-20 &nbsp;#372F2A</td><td>paper-edge &nbsp;#D2CDBF</td></tr>
+      <tr><td class="k">Secondary fill</td><td>brown-30 &nbsp;#473D36</td><td>paper-edge &nbsp;#D2CDBF</td></tr>
+      <tr><td class="k">Hover surface</td><td>brown-40 &nbsp;#5A4E45</td><td>paper-warm &nbsp;#C9C3B7</td></tr>
+      <tr><td class="k">Primary text</td><td>paper &nbsp;#F0EDE4</td><td>ink &nbsp;#141110</td></tr>
+      <tr><td class="k">Secondary text</td><td>tint &nbsp;#B0A49B</td><td>ink-soft &nbsp;#4A423C</td></tr>
+      <tr><td class="k">Primary button</td><td>paper fill, ink text</td><td>ink fill, paper text</td></tr>
+      <tr><td class="k">Accent · interaction</td><td>orange &nbsp;#C07000</td><td>orange &nbsp;#C07000</td></tr>
+      <tr><td class="k">Accent · marker</td><td>red &nbsp;#C43D2E</td><td>red &nbsp;#C43D2E</td></tr>
+    </table>
+  </section>
+
+  <section id="type">
+    <div class="sec-head"><h2>Typography</h2><div class="note">Two families</div></div>
+    <div class="cells auto" style="margin-bottom:56px">
+      <div class="cell">
+        <div style="font-family:var(--font-display);font-size:83px;line-height:.6">Aa</div>
+        <h3>Chathura</h3>
+        <p style="color:var(--tint)">Display. Recipe titles, section heads, wordmark, numerals in
+          labels. Regular weight only — never bold, never below 20px, never for running text.
+          Line-height is pulled tight to 0.6 — the face carries its own vertical air.</p>
+      </div>
+      <div class="cell">
+        <div style="font-size:56px;line-height:1;font-weight:300">Aa</div>
+        <h3>JetBrains Mono</h3>
+        <p style="color:var(--tint)">The ambient voice. Body copy, steps, ingredients, labels,
+          buttons, inputs, breadcrumbs. Weights 300 / 400 / 500 only.</p>
+      </div>
+    </div>
+    <table class="tbl">
+      <tr><th>Token</th><th>Spec</th><th>Use</th><th>Sample</th></tr>
+      <tr><td class="k">display-xl</td><td>Chathura 112 / 0.6 / -1%</td><td>Page opener. One per view.</td>
+        <td><span class="sample" style="font-family:var(--font-display);font-size:44px;line-height:.6">Almond Sea Salt</span></td></tr>
+      <tr><td class="k">display-lg</td><td>Chathura 65 / 0.6 / -1%</td><td>Recipe title (65). Section head, e.g. Instructions (36).</td>
+        <td><span class="sample" style="font-family:var(--font-display);font-size:34px;line-height:.6">Instructions</span></td></tr>
+      <tr><td class="k">display-sm</td><td>Chathura 33 / 0.6</td><td>Modal title, card head.</td>
+        <td><span class="sample" style="font-family:var(--font-display);font-size:26px;line-height:.6">Save to a collection</span></td></tr>
+      <tr><td class="k">label</td><td>Chathura 19 / 0.6 / 0.2em / caps</td><td>Wordmark, card labels.</td>
+        <td><span class="sample" style="font-family:var(--font-display);font-size:19px;line-height:.6;letter-spacing:.2em">BATCH NO. 007</span></td></tr>
+      <tr><td class="k">body-lg</td><td>Mono 300 · 15 / 1.75</td><td>Intro copy, step text.</td>
+        <td><span class="sample" style="font-size:15px;font-weight:300">Toast the almonds before folding.</span></td></tr>
+      <tr><td class="k">body</td><td>Mono 400 · 14 / 1.7</td><td>Default running text.</td>
+        <td><span class="sample" style="font-size:14px">60 grams · 40 minutes · yield 8</span></td></tr>
+      <tr><td class="k">ui</td><td>Mono 400 · 13 / 1.6</td><td>Buttons, nav, breadcrumb, inputs.</td>
+        <td><span class="sample" style="font-size:13px">Generate recipe</span></td></tr>
+      <tr><td class="k">meta</td><td>Mono 400 · 12 / 1.6</td><td>Chips, table cells, captions.</td>
+        <td><span class="sample" style="font-size:12px">Vegan and gluten free</span></td></tr>
+      <tr><td class="k">eyebrow</td><td>Mono 400 · 11 / 0.18em / caps</td><td>Section eyebrows, field labels.</td>
+        <td><span class="sample" style="font-size:11px;letter-spacing:.18em">INGREDIENTS</span></td></tr>
+    </table>
+  </section>
+
+  <section id="spacing">
+    <div class="sec-head"><h2>Spacing</h2><div class="note">Base 8 &nbsp;/&nbsp; 4px half-step</div></div>
+    <p class="p">Nine steps, exposed in <code>index.html</code> as <code>--space-1</code> … <code>--space-9</code>.
+      Inside a component use 4–16; between components 24–48; between sections 96–176. Gaps are always
+      set with flex or grid <code>gap</code>, never per-element margins.</p>
+    <table class="tbl">
+      <tr><th>Token</th><th>Value</th><th></th><th>Use</th></tr>
+      <tr><td class="k">--space-1</td><td>4px</td><td><i class="bar" style="width:4px"></i></td><td>Caret and inline glyph offsets</td></tr>
+      <tr><td class="k">--space-2</td><td>8px</td><td><i class="bar" style="width:8px"></i></td><td>Stacked lines, chip-to-chip in a dense row</td></tr>
+      <tr><td class="k">--space-3</td><td>12px</td><td><i class="bar" style="width:12px"></i></td><td>Chip rows, button rows, breadcrumb items</td></tr>
+      <tr><td class="k">--space-4</td><td>16px</td><td><i class="bar" style="width:16px"></i></td><td>Field padding, label-to-value</td></tr>
+      <tr><td class="k">--space-5</td><td>24px</td><td><i class="bar" style="width:24px"></i></td><td>Inside a panel, block to block</td></tr>
+      <tr><td class="k">--space-6</td><td>32px</td><td><i class="bar" style="width:32px"></i></td><td>Panel padding, nav item spacing</td></tr>
+      <tr><td class="k">--space-7</td><td>48px</td><td><i class="bar" style="width:48px"></i></td><td>Component group to component group</td></tr>
+      <tr><td class="k">--space-8</td><td>96px</td><td><i class="bar" style="width:96px"></i></td><td>Section to section, minimum</td></tr>
+      <tr><td class="k">--space-9</td><td>176px</td><td><i class="bar" style="width:176px"></i></td><td>Section to section at full width</td></tr>
+    </table>
+  </section>
+
+  <section id="depth">
+    <div class="sec-head"><h2>Depth &amp; motion</h2><div class="note">The liminal layer</div></div>
+    <div class="cells auto">
+      <div class="cell">
+        <h3>Depth stack</h3>
+        <p style="color:var(--tint)">Adjacent items sit behind the focused one, offset and
+          progressively blurred: blur 4px at 50% opacity, then 10px at 30%. Maximum two layers back.
+          Depth replaces pagination — the stack shows where you are.</p>
+      </div>
+      <div class="cell">
+        <h3>Motion tokens</h3>
+        <div>
+          <div class="mtok"><b>ease-liminal</b><span>cubic-bezier(.22,.61,.36,1)</span></div>
+          <div class="mtok"><b>dur-enter</b><span>600ms — surfaces arriving</span></div>
+          <div class="mtok"><b>dur-state</b><span>400ms — hover, focus, fills</span></div>
+          <div class="mtok"><b>dur-resolve</b><span>900ms — blur to focus</span></div>
+          <div class="mtok"><b>glow-breathe</b><span>6s, opacity .45 → .80</span></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="components">
+    <div class="sec-head"><h2>Components</h2><div class="note">Seven patterns</div></div>
+    <div class="flow">
+
+      <div class="cell">
+        <span class="eyebrow">Navigation &amp; breadcrumb</span>
+        <div class="demo" style="justify-content:space-between;background:transparent;padding-left:0;padding-right:0">
+          <span style="font-family:var(--font-display);font-size:21px;line-height:.6;letter-spacing:.24em;text-transform:uppercase">Recidex</span>
+          <span style="font-size:13px">+ Add new &nbsp;&nbsp;&nbsp;&nbsp; Library</span>
+        </div>
+        <div style="font-size:13px;color:var(--tint)">Library &nbsp;&gt;&nbsp; Desserts &nbsp;&gt;&nbsp;
+          <span style="color:var(--paper)">Almond Sea Salt</span></div>
+        <p style="font-size:13px;color:var(--tint)">Nav is 13px mono, uncased, spaced at 40px. It sits
+          directly on the page ground — no panel, fill, or blur behind it. The wordmark is the only
+          tracked-out element. Breadcrumb uses <code>&gt;</code> separators in tint; the current node
+          is paper. No underlines at rest — hover shifts the item to orange over 400ms.</p>
+      </div>
+
+      <div class="cell">
+        <span class="eyebrow">Buttons</span>
+        <div class="demo">
+          <span class="btn primary">Generate recipe</span>
+          <span class="btn secondary">Save to…</span>
+          <span class="btn quiet">Duplicate</span>
+          <span class="btn disabled">Disabled</span>
+        </div>
+        <p style="font-size:13px;color:var(--tint)"><span style="color:var(--paper)">Primary</span> —
+          paper fill, ink text. One per view; reserved for generation and commit.
+          <span style="color:var(--paper)">Secondary</span> — brown-30 fill, paper text, any number.
+          <span style="color:var(--paper)">Quiet</span> — no fill, hover to orange. All: 14/28
+          padding, 5px corners, no border, no shadow.</p>
+      </div>
+
+      <div class="cell">
+        <span class="eyebrow">Tags &amp; chips</span>
+        <div class="demo">
+          <span class="tag on">Seasoning</span>
+          <span class="tag on">Hot/Cold</span>
+          <span class="tag off">Vegan</span>
+          <span class="tag off">Gluten free</span>
+          <span style="font-size:12px;color:var(--tint)"><span class="dot"></span> &nbsp;Active in stack</span>
+        </div>
+        <p style="font-size:13px;color:var(--tint)">Applied tags are orange with ink text.
+          Available-but-unapplied filters are brown-30 with paper text. 2/6 padding, 8px mono, 5px
+          corners — a compact chip that reads as metadata, not a button. Chips never carry a count
+          badge or a remove ✕ — removal happens by clicking the chip.</p>
+      </div>
+
+      <div class="cell">
+        <span class="eyebrow">Inputs &amp; search</span>
+        <div class="demo" style="flex-direction:column;align-items:stretch">
+          <div class="well">Search the library…</div>
+          <div class="well typing">Almond sea salt<span class="caret"></span></div>
+        </div>
+        <p style="font-size:13px;color:var(--tint)">Fields are brown-10 wells with no outline. Focus
+          adds a 2px orange underline inset — the only focus indicator in the system, applied
+          identically to buttons and chips. Placeholders are tint; entered values are paper.</p>
+      </div>
+
+      <div class="cell">
+        <span class="eyebrow">Generating state</span>
+        <div class="demo" style="flex-direction:column;align-items:stretch;gap:8px;min-height:160px">
+          <span class="eyebrow">Composing · batch 008</span>
+          <div style="font-size:13px;color:var(--tint)">reading 412 desserts for almond + salt affinity</div>
+          <div style="font-size:13px;color:var(--tint)">cacao 89% single origin — bittersweet base locked</div>
+          <div style="font-size:13px;color:var(--paper)">salt applied as finish, not in dough<span class="caret" style="background:var(--paper)"></span></div>
+        </div>
+        <p style="font-size:13px;color:var(--tint)">No spinner, no progress bar, no percentage. Lines
+          stream in mono at tint, rising 6px over 600ms; the live line is paper with a blinking
+          caret. When generation completes the block cross-fades to the paper card over 900ms.</p>
+      </div>
+
+      <div class="cell">
+        <span class="eyebrow">Modal / overlay</span>
+        <div class="demo" style="justify-content:center;background:rgba(30,25,23,.62)">
+          <div class="paper-card">
+            <h3>Save to a collection</h3>
+            <p>Almond Sea Salt, batch <span style="color:var(--red)">007</span>, will be filed under
+              the collection you choose.</p>
+            <div class="paper-rule"></div>
+            <div style="display:flex;gap:12px;flex-wrap:wrap">
+              <span class="tag on">Desserts</span>
+              <span class="tag" style="background:#E2DED2;color:#141110">Weeknight</span>
+              <span class="tag" style="background:#E2DED2;color:#141110">Archive</span>
+            </div>
+          </div>
+        </div>
+        <p style="font-size:13px;color:var(--tint)">Modals are paper on a blurred, veiled page — the
+          same depth language as the card stack, not a separate scrim. Page content blurs 6px; the
+          veil is brown-05 at 62%. On paper the roles invert: ink fills the primary button, and
+          secondary chips use a paper shade rather than brown.</p>
+      </div>
+
+      <div class="cell">
+        <span class="eyebrow">Empty state</span>
+        <div class="demo" style="min-height:180px;align-items:flex-start;flex-direction:column;gap:16px">
+          <div style="font-family:var(--font-display);font-size:44px;line-height:.6">Nothing here yet.</div>
+          <div style="font-size:13px;color:var(--tint);max-width:40ch">The library fills as you
+            generate. Describe a dish, an ingredient you have too much of, or a constraint.</div>
+          <div><span class="btn primary">Generate recipe</span> &nbsp; <span class="btn quiet">Import</span></div>
+        </div>
+        <p style="font-size:13px;color:var(--tint)">Empty states are off-center and mostly space, with
+          a single soft glow standing in for the absent artifact. Display line, one line of mono, one
+          primary action. No illustration, no icon, no bordered dropzone.</p>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="rules" style="padding-bottom:0">
+    <div class="sec-head"><h2>Rules</h2><div class="note">Non-negotiable</div></div>
+    <div class="rules">
+      <div class="rule-cell"><span class="n">R1</span><p>No borders. No outlines, no 1px strokes.
+        Separation is surface value, blur, or space. Buttons and tags carry a 5px radius; every other
+        surface is square. The graph's internal bracket rules are the one exception — structural
+        recipe content, drawn in paper-edge on paper.</p></div>
+      <div class="rule-cell"><span class="n">R2</span><p>Paper only where a recipe lives. If a surface
+        is off-white and is not an artifact, it is wrong.</p></div>
+      <div class="rule-cell"><span class="n">R3</span><p>One red per viewport. It marks identity or
+        position, never state or danger.</p></div>
+      <div class="rule-cell"><span class="n">R4</span><p>One primary button per view, and it is paper.
+        Orange is interaction feedback, not a call to action.</p></div>
+      <div class="rule-cell"><span class="n">R5</span><p>Text is never set with opacity. Use paper,
+        tint or ink — the three defined text values.</p></div>
+      <div class="rule-cell"><span class="n">R6</span><p>No spinners, no progress bars, no
+        percentages. Waiting is expressed as streaming mono and breathing glow.</p></div>
+      <div class="rule-cell"><span class="n">R7</span><p>Every gap comes from the spacing scale via
+        flex or grid gap. No arbitrary margins.</p></div>
+      <div class="rule-cell"><span class="n">R8</span><p>Layouts are off-center. Content sits in a
+        column offset from the page, with the long edge left open.</p></div>
+    </div>
+  </section>
+
+</div>
+</body>
+</html>
