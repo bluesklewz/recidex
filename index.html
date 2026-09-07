@@ -3,444 +3,480 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Recipe Graph</title>
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%23EDE9E3'/%3E%3Cg fill='none' stroke='%2384172C' stroke-width='2'%3E%3Crect x='4' y='5' width='24' height='22'/%3E%3Cpath d='M4 12h14M4 19h14M18 5v22'/%3E%3C/g%3E%3C/svg%3E" />
+<title>Recidex</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' fill='%231E1917'/%3E%3Cg fill='none' stroke='%23C07000' stroke-width='2'%3E%3Crect x='4' y='5' width='24' height='22'/%3E%3Cpath d='M4 12h14M4 19h14M18 5v22'/%3E%3C/g%3E%3C/svg%3E" />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Inter+Tight:wght@400;500;600;700&display=swap" rel="stylesheet" />
-<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Chathura:wght@400;700&family=JetBrains+Mono:wght@300;400;500&display=swap" rel="stylesheet" />
+
+<!-- ── Framework exception (see CLAUDE.md): the library route only is a React Three Fiber
+     island. React / three / R3F load as ES modules via this import map — no bundler,
+     no build step. The rest of the app stays vanilla DOM. ── -->
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react-dom": "https://esm.sh/react-dom@18.3.1?deps=react@18.3.1",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?deps=react@18.3.1",
+    "three": "https://esm.sh/three@0.160.1",
+    "@react-three/fiber": "https://esm.sh/@react-three/fiber@8.17.10?deps=react@18.3.1,react-dom@18.3.1,three@0.160.1",
+    "jspdf": "https://esm.sh/jspdf@2.5.2",
+    "html2canvas": "https://esm.sh/html2canvas@1.4.1"
+  }
+}
+</script>
+<link rel="modulepreload" href="https://esm.sh/react@18.3.1" />
+<link rel="modulepreload" href="https://esm.sh/three@0.160.1" />
+<link rel="modulepreload" href="https://esm.sh/@react-three/fiber@8.17.10?deps=react@18.3.1,react-dom@18.3.1,three@0.160.1" />
+
 <style>
   :root{
-    /* ---- MindfulPalettes No.289 · 60 neutral / 30 primary / 10 accent ---- */
-    --color-canvas:#EDE9E3;      /* warm-neutral ground */
-    --color-surface:#FBF9F5;     /* card / panel, nod to Isabelline */
-    --color-ink:#3F000F;         /* Berry Chocolate — near-black, warm */
-    --color-ink-soft:#5F4A46;    /* secondary text */
-    --color-ink-muted:#8F847C;   /* tertiary / meta */
-    --color-hairline:#DDD5CC;    /* borders, rules */
-    --color-primary:#84172C;     /* Sweet Cherry Red — display type + graph */
-    --color-primary-soft:#B53D45;/* Pomegranate */
-    --color-accent:#FAA21A;      /* Phoenix Flames — sparing interactive pop */
-    --color-support:#A0B2C8;     /* Aerial View — quiet cool tint */
-    --color-danger:#B53D45;
+    /* ======================= RECIDEX · v1.0 ======================= */
 
-    /* the one rare pop: orange → burnt-red, used only on the primary button fill */
-    --grad-accent:linear-gradient(118deg,#F7A81E 0%,#DF4A1B 55%,#C5341C 100%);
+    /* --- brown ramp · grounds and elevation only, never a text color --- */
+    --brown-05:#1E1917;   /* page base, behind the glow */
+    --brown-10:#2A2421;   /* panels, cells, inputs at rest */
+    --brown-20:#372F2A;   /* divider gaps, modal veil */
+    --brown-30:#473D36;   /* secondary button fill, chips at rest */
+    --brown-40:#5A4E45;   /* hover and pressed surfaces only */
 
-    /* weight-driven hierarchy (size does less of the work now) */
-    --fw-body:400;
-    --fw-medium:500;
-    --fw-strong:600;
-    --fw-display:800;
+    /* --- neutral · paper is the recipe artifact and nothing else --- */
+    --paper:#F0EDE4;      /* recipe surfaces + primary text on brown */
+    --ink:#141110;        /* all type on paper; never a page ground */
+    --paper-edge:#C9C3B7; /* fine structural rules inside a paper artifact */
+    --ink-soft:#4A423C;   /* secondary text on paper */
+    --tint:#B0A49B;       /* secondary text, labels, placeholders on brown */
 
-    /* soft separation to replace hard borders */
-    --shadow-soft:0 8px 24px rgba(63,0,15,.08);
-    --shadow-soft-lg:0 16px 40px rgba(63,0,15,.13);
+    /* --- accent · orange is interaction, red is a rare marker --- */
+    --orange:#C07000;     /* eyebrows, focus, filled tags — carries ink text */
+    --red:#C43D2E;        /* batch / ID numerals, active dot — one per view */
 
-    /* legacy aliases so existing rules keep resolving */
-    --paper:var(--color-canvas);
-    --paper-2:#E3DFD7;
-    --paper-3:var(--color-surface);
-    --ink:var(--color-ink);
-    --ink-60:var(--color-ink-soft);
-    --ink-30:var(--color-ink-muted);
-    --red:var(--color-primary);
-    --green:var(--color-primary);
-    --hair:var(--color-hairline);
+    /* --- type · two families --- */
+    --font-display:'Chathura','Trebuchet MS',sans-serif;
+    --font-mono:'JetBrains Mono',ui-monospace,'SFMono-Regular',Menlo,monospace;
+    --font-ui:var(--font-mono);
+    --fw-light:300; --fw-body:400; --fw-medium:500;
 
-    --font-ui:'Inter',-apple-system,'Helvetica Neue',Arial,sans-serif;
-    --font-mono:'Inter Tight','Inter',-apple-system,sans-serif;
-
-    --space-1:4px; --space-2:8px; --space-3:16px; --space-4:24px;
-    --space-5:32px; --space-6:48px; --space-7:64px; --space-8:96px;
+    /* --- spacing · base 8 with a 4px half-step --- */
+    --space-1:4px;  --space-2:8px;  --space-3:12px; --space-4:16px;
+    --space-5:24px; --space-6:32px; --space-7:48px; --space-8:96px;
+    --space-9:176px;
     --space:clamp(1.5rem,4vw,3rem);
 
-    --radius:2px;
-    --shadow-panel:0 1px 2px rgba(63,0,15,.05),0 12px 32px rgba(63,0,15,.06);
-    --shadow-float:0 3px 10px rgba(63,0,15,.07),0 30px 70px rgba(63,0,15,.12);
+    /* --- depth and motion · the liminal layer --- */
+    --ease-liminal:cubic-bezier(.22,.61,.36,1);
+    --dur-enter:600ms;   /* surfaces arriving */
+    --dur-state:400ms;   /* hover, focus, fills */
+    --dur-resolve:900ms; /* blur to focus */
+
+    --radius-btn:5px;    /* buttons and tags only; every other surface is square */
+
+    /* --- legacy aliases so mid-rebuild rules keep resolving --- */
+    --color-canvas:var(--brown-05);
+    --color-surface:var(--paper);
+    --color-ink:var(--paper);
+    --color-ink-soft:var(--tint);
+    --color-ink-muted:var(--tint);
+    --color-hairline:var(--brown-20);
+    --color-primary:var(--orange);
+    --color-primary-soft:var(--red);
+    --color-accent:var(--orange);
+    --color-danger:var(--red);
+    --paper-3:var(--paper);
+    --ink-60:var(--tint);
+    --ink-30:var(--tint);
+    --hair:var(--brown-20);
+    --radius:0px;
+    --fw-strong:500; --fw-display:400;
+
     font-synthesis:none;
   }
   *{box-sizing:border-box;margin:0;padding:0}
   html,body{height:100%}
   html{scroll-behavior:smooth}
   body{
-    background:var(--color-canvas);
-    color:var(--color-ink);
-    font-family:var(--font-ui);
-    font-size:15px;
-    line-height:1.6;
+    background:var(--brown-05);
+    color:var(--paper);
+    font-family:var(--font-mono);
+    font-weight:var(--fw-body);
+    font-size:14px;
+    line-height:1.7;
     -webkit-font-smoothing:antialiased;
     overflow-x:hidden;
   }
-  h1,h2,h3,h4{font-family:var(--font-ui);font-weight:var(--fw-display);letter-spacing:-.03em;line-height:1.05}
-  h3,h4{font-weight:var(--fw-strong);letter-spacing:-.015em}
-  .u-label{font-size:13px;color:var(--color-ink-muted);letter-spacing:0;font-weight:var(--fw-body)}
+  /* the liminal ground: a warm depth wash plus a slow olive glow */
+  body::before,body::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:0}
+  body::before{background:radial-gradient(120% 80% at 18% 4%,#5A4E45 0%,#3A312C 34%,#251F1C 68%,#1E1917 100%)}
+  body::after{
+    background:radial-gradient(60% 40% at 78% 22%,rgba(181,164,55,.10),rgba(181,164,55,0) 70%);
+    animation:breathe 6s var(--ease-liminal) infinite;
+  }
+  @keyframes breathe{0%,100%{opacity:.55}50%{opacity:1}}
+  @media (prefers-reduced-motion:reduce){ body::after{animation:none} }
+
+  /* Chathura carries its own vertical air — line-height is pulled tight to 0.6 across every display usage */
+  h1,h2,h3,h4{font-family:var(--font-display);font-weight:400;letter-spacing:-.01em;line-height:.6}
+  h1{font-size:clamp(2.5rem,7vw,4.5rem)}
+  h2{font-size:clamp(2rem,5vw,3.25rem)}
+  h3{font-size:1.6rem}
+  h4{font-size:1.3rem}
+  .u-label{font-family:var(--font-mono);font-size:11px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--orange)}
   .mono{font-family:var(--font-mono)}
   button{font-family:inherit;color:inherit;cursor:pointer;background:none;border:0}
-  a{color:var(--color-primary);text-decoration:none}
-  a:hover{text-decoration:underline}
-  ::selection{background:var(--color-primary);color:var(--color-surface)}
+  a{color:var(--orange);text-decoration:none;transition:color var(--dur-state) var(--ease-liminal)}
+  a:hover{color:var(--paper)}
+  ::selection{background:var(--orange);color:var(--ink)}
 
-  /* the old striped brutalist face is retired — this is now a quiet primary-colored display heading */
+  /* the striped brutalist face is retired — this is now a Chathura display line */
   .striped{
-    font-family:var(--font-ui);font-weight:var(--fw-display);letter-spacing:-.035em;
-    color:var(--color-primary);display:inline-block;line-height:1.0;
+    font-family:var(--font-display);font-weight:400;letter-spacing:-.01em;
+    color:var(--paper);display:inline-block;line-height:.6;
   }
-  .striped.sm{font-weight:var(--fw-strong);letter-spacing:-.01em;font-size:1.02rem;color:var(--color-ink)}
+  .striped.sm{font-size:1.25rem;letter-spacing:.2em;text-transform:uppercase;color:var(--paper)}
 
   /* ---------- shell ---------- */
   #app{position:relative;z-index:1;min-height:100%}
   .topbar{
     position:fixed;top:0;left:0;right:0;z-index:60;
     display:flex;align-items:center;justify-content:space-between;gap:1rem;
-    padding:var(--space-3) var(--space);
-    background:color-mix(in srgb,var(--color-canvas) 88%,transparent);
-    backdrop-filter:blur(8px);
-    border-bottom:1px solid var(--color-hairline);
+    padding:var(--space-4) var(--space);
+    /* sits directly on the page ground — no panel, fill, or blur behind it */
   }
   .topbar .brand{cursor:pointer}
-  .topbar nav{display:flex;align-items:center;gap:var(--space-2)}
+  .topbar nav{display:flex;align-items:center;gap:var(--space-6)}
+
+  /* buttons — quiet by default; .red is the one paper primary; .ghost is brown-30 secondary */
   .pill{
-    border:1px solid var(--color-hairline);background:transparent;color:var(--color-ink-soft);
-    padding:9px 16px;font-size:13px;font-weight:500;border-radius:var(--radius);
-    transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease;
+    font-family:var(--font-mono);
+    border:0;background:transparent;color:var(--paper);
+    padding:14px 20px;font-size:13px;font-weight:400;letter-spacing:.04em;border-radius:var(--radius-btn);
+    transition:background var(--dur-state) var(--ease-liminal),color var(--dur-state) var(--ease-liminal);
   }
-  .pill:hover{background:var(--color-ink);color:var(--color-surface);border-color:var(--color-ink)}
-  .pill:active{transform:translateY(1px)}
-  .pill:focus-visible{outline:2px solid var(--color-primary);outline-offset:2px}
-  .pill.red{border:0;color:#fff;background:var(--grad-accent);font-weight:var(--fw-strong)}
-  .pill.red:hover{background:var(--grad-accent);color:#fff;filter:brightness(1.05)}
-  .pill.red:active{filter:brightness(.95)}
-  .pill.ghost{border-color:var(--color-hairline);background:transparent;color:var(--color-ink-soft)}
-  .pill.ghost:hover{border-color:var(--color-ink);background:var(--color-ink);color:var(--color-surface)}
-
-  /* ============ LIBRARY (frontal cascade↔ring layout engine) ============ */
-  .ring-view{position:relative;min-height:100vh;padding-top:3.4rem;overflow:hidden}
-  .ring-meta{position:absolute;left:var(--space);top:5rem;z-index:5;max-width:16rem}
-  .ring-meta .count{font-size:13px;letter-spacing:0;color:var(--color-ink-muted)}
-  .ring-stage{
-    position:absolute;inset:0;overflow:hidden;
-    touch-action:none;cursor:grab;
-  }
-  .ring-stage:active{cursor:grabbing}
-  /* frontal — no perspective, no rotateX/Y: cards face the viewer directly.
-     .ring is just a flat positioning root; every child's transform is a
-     plain 2D translate written every frame by the JS layout engine. */
-  .ring{position:absolute;inset:0}
-  .orbit{
-    position:absolute;left:0;top:0;
-    will-change:transform;transition:opacity .32s ease;
-  }
-  .idx-card{
-    width:100%;height:100%;background:var(--color-surface);
-    border-radius:var(--radius);
-    padding:var(--space-2) var(--space-3);
-    display:flex;flex-direction:column;justify-content:space-between;gap:var(--space-1);
-    cursor:pointer;position:relative;overflow:hidden;
-    box-shadow:var(--shadow-soft);
-    transition:transform .2s cubic-bezier(.2,.8,.2,1),box-shadow .2s ease;
-  }
-  .idx-card:hover{transform:scale(1.045);box-shadow:var(--shadow-soft-lg);z-index:5}
-  .idx-card .bn{font-family:var(--font-mono);font-size:11px;letter-spacing:0;color:var(--color-ink-muted)}
-  .idx-card .bn b{color:var(--color-ink-soft);font-weight:var(--fw-medium)}
-  .idx-card .nm{font-family:var(--font-ui);font-weight:var(--fw-strong);
-    font-size:14px;line-height:1.15;letter-spacing:-.015em;color:var(--color-ink);
-    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
-  .idx-card .tg{font-size:10.5px;letter-spacing:0;color:var(--color-ink-muted);
-    white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .ring-empty{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;
-    justify-content:center;text-align:center;gap:1rem;padding:2rem;z-index:9}
-
-  /* center hover-reveal — only shown once the ring is (near) assembled */
-  .ring-preview{
-    position:absolute;left:50%;top:50%;z-index:50;
-    width:min(60vw,340px);
-    background:var(--color-surface);border-radius:var(--radius);box-shadow:var(--shadow-soft-lg);
-    padding:var(--space-3);cursor:pointer;pointer-events:none;
-    transform:translate(-50%,-50%) scale(.9);opacity:0;
-    transition:opacity .2s ease-out,transform .2s ease-out;
-  }
-  .ring-preview.show{opacity:1;transform:translate(-50%,-50%) scale(1);pointer-events:auto}
-  .ring-preview .pv-name{font-family:var(--font-ui);font-weight:var(--fw-strong);font-size:14px;
-    margin-bottom:.5rem;color:var(--color-ink);letter-spacing:-.01em}
-  .ring-preview .graph-wrap{overflow:visible}
-
-  /* auto-assemble toggle + zoom, grouped near the filter dock (top-right, mirrors .ring-meta) */
-  .lib-controls{
-    position:fixed;right:var(--space);top:5rem;z-index:41;
-    display:flex;flex-direction:column;gap:.6rem;
-    background:var(--color-surface);border:1px solid var(--color-hairline);border-radius:var(--radius);
-    padding:.65rem .8rem;box-shadow:var(--shadow-panel);
-  }
-  .lib-controls .row{display:flex;align-items:center;justify-content:space-between;gap:.9rem}
-  .lib-controls .row-label{font-size:12px;letter-spacing:0;color:var(--color-ink-soft)}
-  .switch{
-    width:32px;height:18px;border-radius:999px;background:var(--color-hairline);
-    position:relative;flex:none;transition:background .18s ease;border:0;
-  }
-  .switch .knob{
-    position:absolute;left:2px;top:2px;width:14px;height:14px;border-radius:50%;
-    background:var(--color-surface);box-shadow:0 1px 2px rgba(0,0,0,.2);
-    transition:transform .18s cubic-bezier(.2,.8,.2,1);
-  }
-  .switch.on{background:var(--grad-accent)}
-  .switch.on .knob{transform:translateX(14px)}
-  .zoom-group{display:flex;align-items:center;gap:.4rem}
-  .zoom-btn{
-    width:20px;height:20px;border-radius:50%;background:var(--color-canvas);
-    color:var(--color-ink-soft);font-size:13px;line-height:1;display:flex;align-items:center;justify-content:center;
-  }
-  .zoom-btn:hover{background:var(--color-hairline);color:var(--color-ink)}
-  .zoom-label{font-family:var(--font-mono);font-size:11px;color:var(--color-ink-muted);min-width:2.6em;text-align:center}
-
-  /* filter dock — design-system ranked category list */
-  .filter-dock{
-    position:fixed;right:var(--space);bottom:var(--space);z-index:40;
-    width:min(84vw,15rem);background:var(--color-surface);
-    border:1px solid var(--color-hairline);border-radius:var(--radius);
-    padding:var(--space-3);box-shadow:var(--shadow-panel);
-  }
-  .filter-dock h4{font-size:13px;font-weight:500;letter-spacing:0;margin-bottom:var(--space-3);
-    display:flex;justify-content:space-between;align-items:baseline}
-  .filter-dock h4 span{font-family:var(--font-mono);font-weight:400;color:var(--color-ink-muted);font-size:12px}
-  .tag-search{width:100%;border:0;border-bottom:1px solid var(--color-hairline);background:transparent;
-    font-family:inherit;font-size:13px;padding:.35rem 0;margin-bottom:var(--space-3);color:var(--color-ink)}
-  .tag-search::placeholder{color:var(--color-ink-muted)}
-  .tag-search:focus{outline:none;border-color:var(--color-primary)}
-  .tag-list{display:flex;flex-direction:column;gap:2px;max-height:38vh;overflow:auto}
-  .tag-chip{
-    position:relative;border:0;background:transparent;padding:.28rem 0 .28rem 14px;text-align:left;
-    font-size:13px;letter-spacing:0;color:var(--color-ink-muted);
-    display:flex;justify-content:space-between;align-items:baseline;gap:.5rem;
-    transition:color .15s ease;
-  }
-  .tag-chip:hover{color:var(--color-ink)}
-  .tag-chip b{font-family:var(--font-mono);font-weight:400;font-size:10px;color:var(--color-ink-muted)}
-  .tag-chip.on{color:var(--color-primary);font-weight:500}
-  .tag-chip.on::before{content:"";position:absolute;left:0;top:.62em;width:5px;height:5px;background:var(--color-accent)}
-  .tag-chip.on b{color:var(--color-primary)}
-  .filter-clear{margin-top:var(--space-3);font-size:12px;letter-spacing:0;color:var(--color-ink-soft);
-    background:none;border:0;border-bottom:1px solid var(--color-hairline);padding:0 0 1px}
-  .filter-clear:hover{color:var(--color-ink);border-bottom-color:var(--color-ink)}
+  .pill:hover{color:var(--orange)}
+  .pill:focus-visible{outline:none;box-shadow:inset 0 -2px 0 0 var(--orange)}
+  .pill.red{background:var(--paper);color:var(--ink);padding:14px 28px}
+  .pill.red:hover{background:#fff;color:var(--ink)}
+  .pill.ghost{background:var(--brown-30);color:var(--paper);padding:14px 28px}
+  .pill.ghost:hover{background:var(--brown-40);color:var(--paper)}
 
   /* ============ GENERATOR ============ */
-  .gen{max-width:60rem;margin:0 auto;padding:var(--space-8) var(--space) var(--space-7);display:grid;gap:var(--space-5)}
-  .gen h1{font-size:clamp(2rem,5vw,3.25rem);font-weight:var(--fw-display);letter-spacing:-.035em}
-  .gen .lede{max-width:56ch;color:var(--color-ink-soft);font-size:16px;line-height:1.6}
-  .gen-grid{display:grid;gap:var(--space-4);grid-template-columns:1fr 1fr}
+  .gen{max-width:60rem;margin:0 auto;padding:var(--space-8) var(--space) var(--space-7);display:grid;gap:var(--space-6)}
+  .gen h1{font-family:var(--font-display);font-size:clamp(2.75rem,7vw,4.5rem);font-weight:400;letter-spacing:-.01em;line-height:.6}
+  .gen .lede{max-width:60ch;color:var(--tint);font-size:15px;font-weight:var(--fw-light);line-height:1.75}
+  .gen-grid{display:grid;gap:var(--space-5);grid-template-columns:1fr 1fr}
   .field{display:grid;gap:var(--space-2)}
   .field.full{grid-column:1/-1}
-  .field label{font-size:13px;font-weight:500;letter-spacing:0;color:var(--color-ink)}
-  .field .hint{font-size:13px;color:var(--color-ink-muted);letter-spacing:0;font-weight:400}
+  .field label{font-family:var(--font-mono);font-size:11px;font-weight:400;letter-spacing:.18em;text-transform:uppercase;color:var(--orange)}
+  .field .hint{font-size:11px;color:var(--tint);letter-spacing:.04em;text-transform:none}
   .field input,.field textarea{
-    width:100%;background:var(--color-surface);border:1px solid var(--color-hairline);border-radius:var(--radius);
-    font-family:inherit;font-size:14px;padding:.6rem .7rem;color:inherit;resize:vertical;
+    width:100%;background:var(--brown-10);border:0;border-radius:0;
+    font-family:var(--font-mono);font-size:14px;padding:16px 20px;color:var(--paper);resize:vertical;
+    transition:box-shadow var(--dur-state) var(--ease-liminal);
   }
-  .field textarea{min-height:11rem;line-height:1.7;font-family:var(--font-mono)}
-  .field input:focus,.field textarea:focus{outline:none;border-color:var(--color-primary);
-    box-shadow:0 0 0 3px color-mix(in srgb,var(--color-primary) 12%,transparent)}
-  .gen-actions{display:flex;gap:var(--space-2);align-items:center;flex-wrap:wrap}
-  .gen-preview{border-top:1px solid var(--color-hairline);padding-top:var(--space-4);display:grid;gap:var(--space-3)}
-  .gen-preview .u-label{color:var(--color-ink-muted)}
+  .field input::placeholder,.field textarea::placeholder{color:var(--tint)}
+  .field textarea{min-height:12rem;line-height:1.7}
+  .field select{
+    width:100%;background:var(--brown-10);border:0;border-radius:0;
+    font-family:var(--font-mono);font-size:14px;padding:16px 20px;color:var(--paper);
+    appearance:none;cursor:pointer;
+    transition:box-shadow var(--dur-state) var(--ease-liminal);
+  }
+  .field input:focus,.field textarea:focus,.field select:focus{outline:none;box-shadow:inset 0 -2px 0 0 var(--orange)}
+  .gen-actions{display:flex;gap:var(--space-3);align-items:center;flex-wrap:wrap}
+  .gen-preview{padding-top:var(--space-7);display:grid;gap:var(--space-4)}
+  .gen-preview .u-label{color:var(--tint)}
+  /* destructive zone — set apart from Save/Cancel by space, right-aligned */
+  .gen-danger{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;
+    gap:var(--space-3) var(--space-4);margin-top:var(--space-6)}
+  .gen-danger .del-q{margin-right:auto;font-size:13px;color:var(--tint);letter-spacing:.02em;line-height:1.6}
+  .btn-del{font-family:var(--font-mono);font-size:13px;letter-spacing:.04em;
+    background:transparent;border:0;color:var(--red);padding:14px 8px;border-radius:var(--radius-btn);
+    cursor:pointer;transition:color var(--dur-state) var(--ease-liminal),background var(--dur-state) var(--ease-liminal)}
+  .btn-del:hover{color:#DD5748}
+  .btn-del:focus-visible{outline:none;box-shadow:inset 0 -2px 0 0 var(--red)}
+  .btn-del.solid{background:var(--red);color:var(--paper);padding:14px 24px}
+  .btn-del.solid:hover{background:#D3483B;color:var(--paper)}
+  .gen-danger .pill:focus{outline:none;box-shadow:inset 0 -2px 0 0 var(--orange)}
 
-  /* ============ GRAPH ============ */
+  /* ============ GRAPH — the recipe artifact: paper, ink, fine structural rules ============ */
   .graph-wrap{overflow-x:auto;padding-bottom:.2rem}
   .graph{
-    display:grid;justify-content:start;background:var(--color-surface);
-    border:1px solid var(--color-primary);border-radius:var(--radius);
-    width:max-content;font-family:var(--font-mono);
+    display:grid;justify-content:start;background:var(--paper);
+    border:1px solid var(--paper-edge);border-radius:0;
+    width:max-content;font-family:var(--font-mono);color:var(--ink);
+    box-shadow:0 24px 60px rgba(0,0,0,.4);
   }
   .graph .g-banner{
-    grid-column:1/-1;border-bottom:1px solid var(--color-primary);
-    text-align:center;padding:.42rem .6rem;font-size:13px;color:var(--color-ink-soft);
+    grid-column:1/-1;border-bottom:1px solid var(--paper-edge);
+    text-align:center;padding:.5rem .7rem;font-size:12px;color:var(--ink-soft);
   }
   .graph .g-ing{
-    grid-column:1/2;border-bottom:1px solid var(--color-primary);border-right:1px solid var(--color-primary);
-    padding:.34rem .6rem;font-size:13px;display:flex;align-items:center;color:var(--color-ink);
+    grid-column:1/2;border-bottom:1px solid var(--paper-edge);border-right:1px solid var(--paper-edge);
+    padding:.4rem .7rem;font-size:12px;display:flex;align-items:center;color:var(--ink);
   }
   .graph .g-cell{
-    border:1px solid var(--color-primary);margin:-0.5px 0 0 -0.5px;
+    border:1px solid var(--paper-edge);margin:-0.5px 0 0 -0.5px;
     display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;
-    padding:.3rem .5rem;font-size:12.5px;line-height:1.15;min-width:2.9rem;color:var(--color-ink);
+    padding:.35rem .55rem;font-size:12px;line-height:1.2;min-width:2.9rem;color:var(--ink);
   }
   .graph .g-cell{max-width:11rem}
   .graph .g-cell>span:first-child{white-space:nowrap}
   .graph .g-cell .det{display:flex;flex-direction:column;align-items:center;gap:.05rem;
-    font-size:10.5px;color:var(--color-ink-muted);margin-top:.24rem;font-style:normal}
+    font-size:10px;color:var(--ink-soft);margin-top:.24rem;font-style:normal}
   .graph .g-cell .det i{font-style:normal;white-space:nowrap}
   .graph.mini{transform-origin:top left;border-width:1px}
-  .graph.mini .g-banner,.graph.mini .g-ing,.graph.mini .g-cell{font-size:10.5px;padding:.2rem .32rem;min-width:2.4rem}
-
-  /* the printable artifact card */
-  .flip{
-    perspective:1800px;width:min(100%,600px);
-  }
-  .flip-inner{
-    display:grid;width:100%;transition:transform .8s cubic-bezier(.6,.05,.2,1);
-    transform-style:preserve-3d;cursor:pointer;
-  }
-  .flip.flipped .flip-inner{transform:rotateY(180deg)}
-  .flip-face{
-    grid-area:1/1;width:100%;overflow:hidden;
-    backface-visibility:hidden;-webkit-backface-visibility:hidden;
-    background:var(--color-surface);border:1px solid var(--color-hairline);border-radius:var(--radius);
-    box-shadow:var(--shadow-float);
-    display:flex;flex-direction:column;
-  }
-  .flip-face.back{transform:rotateY(180deg)}
-  .card-head,.card-foot{flex:none}
-  .card-body{flex:1;display:flex;flex-direction:column;justify-content:center;align-items:center}
-  .card-head{
-    display:flex;justify-content:space-between;align-items:center;gap:1rem;
-    padding:var(--space-3);border-bottom:1px solid var(--color-hairline);
-  }
-  .card-head .ch-name{font-family:var(--font-ui);font-weight:var(--fw-strong);
-    font-size:16px;letter-spacing:-.02em;line-height:1.1}
-  .card-head .ch-bn{font-family:var(--font-mono);font-weight:400;font-size:12px;letter-spacing:0;color:var(--color-ink-muted);white-space:nowrap}
-  .card-head .ch-bn b{color:var(--color-primary);font-weight:500}
-  .card-body{padding:var(--space-4);min-width:0;width:100%;overflow:hidden}
-  .card-foot{padding:var(--space-2) var(--space-3);border-top:1px solid var(--color-hairline);
-    font-size:11px;letter-spacing:0;color:var(--color-ink-muted);
-    display:flex;justify-content:space-between;gap:1rem}
-  .flip-hint{margin-top:var(--space-3);font-size:12px;letter-spacing:0;color:var(--color-ink-muted)}
-
-  /* label (card back) */
-  .label{padding:var(--space-5);display:flex;flex-direction:column;justify-content:space-between;
-    gap:.4rem;flex:1;position:relative;min-height:16rem;background:var(--color-surface)}
-  .label hr{width:100%}
-  .label .l-top{display:flex;align-items:flex-start;gap:1rem;justify-content:space-between}
-  .label .l-name{font-family:var(--font-ui);font-weight:var(--fw-display);
-    font-size:clamp(1.4rem,4vw,2.1rem);letter-spacing:-.035em;line-height:.95;color:var(--color-ink);text-transform:uppercase}
-  .label .l-batch{font-family:var(--font-mono);font-size:11px;letter-spacing:0;
-    text-align:right;padding-left:1rem;border-left:1px solid var(--color-ink);white-space:nowrap;color:var(--color-ink-soft)}
-  .label .l-batch b{display:block;font-size:1.5rem;line-height:1;color:var(--color-primary);letter-spacing:0;margin-top:.2rem;font-weight:600}
-  .label hr{border:0;border-top:1px solid var(--color-ink);margin:.55rem 0}
-  .label .l-row{display:flex;justify-content:space-between;gap:1rem;align-items:flex-start}
-  .label .l-yield{font-family:var(--font-mono);font-size:13px;letter-spacing:0;color:var(--color-ink)}
-  .label .l-stat{display:flex;gap:.7rem;align-items:baseline}
-  .label .l-stat .big{font-family:var(--font-ui);font-weight:600;font-size:1.5rem;letter-spacing:-.025em}
-  .label .l-stat .cap{font-size:10.5px;letter-spacing:0;line-height:1.2;color:var(--color-ink-soft)}
-  .label .l-diet{font-size:10.5px;letter-spacing:0;line-height:1.25;
-    text-align:right;padding-left:.9rem;border-left:1px solid var(--color-ink);color:var(--color-ink-soft)}
-  .label .l-ing h5{font-size:11px;letter-spacing:.06em;text-transform:uppercase;margin-bottom:.5rem;font-weight:600;color:var(--color-ink-soft)}
-  .label .l-ing p{font-size:12px;letter-spacing:0;line-height:1.5;padding-right:3.5rem;color:var(--color-ink)}
-  .label .l-mark{position:absolute;right:1.4rem;bottom:1.3rem;width:52px;height:52px}
-
-  /* ============ RECIPE VIEW ============ */
-  .rv{position:relative;min-height:100vh;overflow:hidden}
-  .rv-ghost{position:absolute;inset:0;z-index:0;pointer-events:none;overflow:hidden}
-  .rv-ghost .blob,.rv-ghost .word{display:none}
-  .rv-grid{
-    position:relative;z-index:1;display:grid;gap:clamp(1.5rem,3vw,2.6rem);
-    grid-template-columns:minmax(180px,17%) minmax(0,1fr) minmax(300px,32%);
-    padding:var(--space-7) var(--space) var(--space-8);min-height:100vh;align-items:start;
-  }
-  .rv-list{position:sticky;top:5rem;max-height:calc(100vh - 7rem);display:flex;flex-direction:column;gap:.6rem}
-  .rv-list .back{align-self:flex-start;margin-bottom:.5rem}
-  .rv-list .scroll{overflow-y:auto;display:flex;flex-direction:column;gap:.3rem;padding-right:.3rem}
-  .rv-list .r-item{
-    text-align:left;background:none;border:0;padding:.2rem 0;
-    font-family:var(--font-ui);font-weight:400;letter-spacing:0;
-    font-size:14px;line-height:1.25;color:var(--color-ink-muted);
-    transition:color .15s ease,transform .15s ease;
-  }
-  .rv-list .r-item:hover{color:var(--color-ink);transform:translateX(2px)}
-  .rv-list .r-item.on{color:var(--color-ink);font-weight:500;font-size:15px;line-height:1.2;
-    display:flex;gap:.4rem;align-items:baseline}
-  .rv-list .r-item.on::before{content:"";width:5px;height:5px;background:var(--color-accent);flex:none;transform:translateY(-1px)}
-
-  .rv-main{display:grid;gap:var(--space-3);justify-items:start;max-width:620px;min-width:0}
-  .rv-title{font-size:clamp(1.6rem,3.6vw,2.5rem);margin-top:.3rem;max-width:100%;font-weight:var(--fw-display)}
-  .rv-squiggle{display:none}
-  .rv-tags{display:flex;flex-direction:column;gap:.2rem}
-  .rv-tags .t{font-size:12px;letter-spacing:0;color:var(--color-ink-muted);
-    display:flex;align-items:center;gap:.45rem}
-  .rv-tags .t::before{content:"";width:4px;height:4px;background:var(--color-primary);flex:none}
-  .rv-tags .t button{background:none;border:0;color:var(--color-ink-muted);font-size:14px;line-height:1;padding:0 .2rem}
-  .rv-tags .t button:hover{color:var(--color-danger)}
-  .rv-tagadd{border:0;border-bottom:1px solid var(--color-hairline);background:transparent;
-    font-family:inherit;font-size:12px;letter-spacing:0;
-    padding:.2rem 0;width:9rem;margin-top:.2rem;color:var(--color-ink)}
-  .rv-tagadd:focus{outline:none;border-color:var(--color-primary)}
-  .rv-actions{display:flex;flex-direction:column;gap:.15rem;margin-top:.4rem}
-  .rv-actions button{
-    background:none;border:0;text-align:left;font-family:var(--font-ui);font-size:14px;color:var(--color-ink-soft);
-    display:flex;align-items:center;gap:.5rem;padding:.2rem 0;
-    border-bottom:1px solid transparent;width:max-content;
-  }
-  .rv-actions button:hover{border-bottom-color:var(--color-ink);color:var(--color-ink)}
-  .rv-actions button.danger:hover{color:var(--color-danger);border-bottom-color:var(--color-danger)}
-  .rv-actions svg{width:14px;height:14px;flex:none}
-
-  .rv-instructions{position:sticky;top:5rem;max-height:calc(100vh - 7rem);
-    display:flex;flex-direction:column;padding-bottom:1rem}
-  .rv-instructions .ih{display:flex;justify-content:space-between;align-items:center;margin-bottom:var(--space-4)}
-  .rv-instructions .ih h2{font-size:clamp(1.4rem,3vw,2rem);font-weight:var(--fw-display);letter-spacing:-.03em}
-  .rv-instructions .ih button{background:none;border:0;color:var(--color-ink-muted)}
-  .rv-instructions .ih button:hover{color:var(--color-ink)}
-  .rv-instructions .ih svg{width:16px;height:16px}
-  .rv-steps{overflow-y:auto;
-    -webkit-mask-image:linear-gradient(180deg,#000 84%,transparent);
-    mask-image:linear-gradient(180deg,#000 84%,transparent);padding-right:.4rem}
-  .rv-step{margin-bottom:var(--space-4)}
-  .rv-step .sn{font-family:var(--font-mono);font-weight:500;
-    letter-spacing:0;font-size:11px;color:var(--color-ink-muted);margin-bottom:.3rem}
-  .rv-step p{font-size:14px;line-height:1.7;color:var(--color-ink)}
-  .rv-editsteps{width:100%;min-height:16rem;background:var(--color-surface);border:1px solid var(--color-hairline);border-radius:var(--radius);
-    font-family:var(--font-mono);font-size:13px;line-height:1.7;padding:.7rem;resize:vertical;color:var(--color-ink)}
-  .rv-editsteps:focus{outline:none;border-color:var(--color-primary)}
-
-  .rv-nav{position:fixed;left:0;right:0;bottom:0;z-index:20;display:flex;justify-content:space-between;
-    padding:var(--space);pointer-events:none}
-  .rv-nav .pill{pointer-events:auto;background:var(--color-surface)}
+  .graph.mini .g-banner,.graph.mini .g-ing,.graph.mini .g-cell{font-size:10px;padding:.22rem .34rem;min-width:2.4rem}
 
   .toast{position:fixed;left:50%;bottom:2rem;transform:translateX(-50%) translateY(2rem);
-    background:var(--color-ink);color:var(--color-surface);padding:.6rem 1rem;font-size:12px;letter-spacing:0;
-    border-radius:var(--radius);z-index:200;opacity:0;transition:opacity .25s ease,transform .25s ease}
+    background:var(--brown-30);color:var(--paper);padding:.7rem 1.1rem;font-size:12px;letter-spacing:.02em;
+    border-radius:0;z-index:200;opacity:0;transition:opacity var(--dur-state) var(--ease-liminal),transform var(--dur-state) var(--ease-liminal)}
   .toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+
+  /* ============ LIBRARY — the R3F ring island ============ */
+  @keyframes caret{0%,49%{opacity:1}50%,100%{opacity:0}}
+  #lib-stage{position:fixed;inset:0;z-index:1;background:transparent}
+  #lib-stage canvas{display:block;touch-action:none;outline:none}
+  /* ring ⇄ recipe morph: the canvas fades in on the way in, and on the way out
+     drops behind the incoming recipe view while its cards finish travelling */
+  #lib-stage.lib-stage-in{animation:libStageIn var(--dur-enter) var(--ease-liminal)}
+  #lib-stage.lib-stage-out{opacity:0;z-index:0;transition:opacity 340ms var(--ease-liminal)}
+  @keyframes libStageIn{from{opacity:0}to{opacity:1}}
+  .lib-hint{
+    position:fixed;left:50%;bottom:var(--space-7);transform:translateX(-50%);z-index:2;
+    font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--tint);
+    pointer-events:none;white-space:nowrap;
+  }
+  .lib-loading{
+    position:fixed;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:center;
+    gap:var(--space-3);padding:0 clamp(24px,12vw,200px);background:var(--brown-05);
+  }
+  .lib-loading .eyebrow{
+    font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;
+    text-transform:uppercase;color:var(--orange);margin-bottom:var(--space-3);
+  }
+  .lib-loading .line{font-size:13px;line-height:1.7;color:var(--tint)}
+  .lib-loading .line.live{color:var(--paper)}
+  .lib-loading .line .caret{
+    display:inline-block;width:8px;height:14px;background:var(--paper);
+    margin-left:2px;vertical-align:-2px;animation:caret 1.1s step-end infinite;
+  }
+
+  /* ============ RECIPE VIEW — breadcrumb · label menu · flip carousel · detail ============ */
+  .rv-crumb{
+    position:fixed;top:84px;left:max(var(--space),8vw);z-index:55;
+    display:flex;align-items:center;gap:var(--space-3);
+    font-family:var(--font-mono);font-size:13px;color:var(--tint);
+  }
+  .rv-crumb a{color:var(--tint)}
+  .rv-crumb a:hover{color:var(--orange)}
+  .rv-crumb .sep{color:var(--tint)}
+  .rv-crumb .here{color:var(--paper)}
+
+  .rv{
+    display:grid;
+    /* menu : carousel : description = 2 : 3 : 4, on a consistent 48px gutter */
+    grid-template-columns:minmax(0,2fr) minmax(0,3fr) minmax(0,4fr);
+    gap:var(--space-7);align-items:center;
+    min-height:100vh;
+    padding:128px max(var(--space),5vw) var(--space-7) max(var(--space),8vw);
+  }
+  /* recipe view fades up as the ring canvas hands off / fades out behind it */
+  @keyframes rvEnter{from{opacity:0}to{opacity:1}}
+  .rv,.rv-crumb{animation:rvEnter 460ms var(--ease-liminal)}
+  /* right-column entrance — runs once the card has finished arriving (see
+     viewRecipe): title → description → instructions → tags+actions, a light
+     staggered cascade. Card + left label list are untouched. */
+  @keyframes rvColIn{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}
+
+  /* left — vertical label menu (design-system `label` type, tracked title-case) */
+  .rv-labels{
+    display:flex;flex-direction:column;gap:var(--space-4);align-self:center;
+    max-height:58vh;overflow-y:auto;overscroll-behavior:contain;
+    scrollbar-width:none;
+  }
+  .rv-labels.masked{
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);
+            mask-image:linear-gradient(to bottom,transparent 0,#000 28px,#000 calc(100% - 28px),transparent 100%);
+  }
+  .rv-labels::-webkit-scrollbar{display:none}
+  .rv-label{
+    flex:none;
+    font-family:var(--font-display);font-weight:400;font-size:26px;line-height:.6;
+    letter-spacing:.06em;text-align:left;color:var(--tint);
+    transition:color var(--dur-state) var(--ease-liminal);
+  }
+  .rv-label:hover{color:var(--paper)}
+  .rv-label.active{color:var(--paper)}
+  .rv-label:focus-visible{outline:none;box-shadow:inset 0 -2px 0 0 var(--orange)}
+
+  /* center — vertical depth-stack carousel */
+  .rv-stage{position:relative;height:min(64vh,540px);perspective:1600px}
+  .rv-flip{
+    position:absolute;left:50%;top:50%;
+    width:min(100%,400px);aspect-ratio:4/3;
+    transform:translate(-50%,-50%);
+    transition:transform var(--dur-resolve) var(--ease-liminal),
+               opacity var(--dur-resolve) var(--ease-liminal),
+               filter var(--dur-resolve) var(--ease-liminal);
+    cursor:pointer;
+  }
+  .rv-flip-inner{
+    position:relative;width:100%;height:100%;
+    transform-style:preserve-3d;
+    transition:transform var(--dur-resolve) var(--ease-liminal);
+  }
+  .rv-flip.flipped .rv-flip-inner{transform:rotateY(180deg)}
+  .rv-face{
+    position:absolute;inset:0;overflow:hidden;
+    backface-visibility:hidden;-webkit-backface-visibility:hidden;
+    background:var(--paper);
+    box-shadow:0 24px 60px rgba(0,0,0,.42);
+  }
+  .rv-face.back{
+    transform:rotateY(180deg);
+    display:flex;align-items:center;justify-content:center;padding:var(--space-3);
+  }
+  .rv-face.back .graph-wrap{overflow:visible;padding:0}
+  .rv-face.back .graph{box-shadow:none;transform-origin:center center}
+  .rv-flip-hint{
+    position:absolute;right:0;bottom:0;z-index:4;width:30px;height:30px;
+    background:linear-gradient(135deg,transparent 0 46%,var(--paper-edge) 46% 52%,#E4DFD4 52% 100%);
+  }
+  .rv-flip-hint::after{
+    content:"";position:absolute;right:6px;bottom:6px;width:9px;height:9px;
+    border-right:1.5px solid var(--ink-soft);border-bottom:1.5px solid var(--ink-soft);
+  }
+
+  /* the label face — chocolate-bar-label layout, Recidex-ized */
+  .lc{position:absolute;inset:0;padding:18px 20px;color:var(--ink);font-family:var(--font-mono)}
+  .lc::before{
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='p'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23p)'/%3E%3C/svg%3E");
+    mix-blend-mode:multiply;opacity:.045;
+  }
+  .lc-ink{position:relative;height:100%;display:flex;flex-direction:column;filter:url(#rv-inkbleed)}
+  .lc-hr{height:1px;background:var(--paper-edge);margin:7px 0;flex:none}
+  .lc-row{display:flex;flex:none}
+  .lc-vr{width:1px;background:var(--paper-edge);margin:0 12px;align-self:stretch;flex:none}
+  .lc-r1{align-items:flex-start;justify-content:space-between}
+  .lc-title{
+    font-family:var(--font-display);font-weight:400;font-size:26px;line-height:.6;
+    letter-spacing:.11em;max-width:64%;
+  }
+  .lc-batch{text-align:right;flex:none}
+  .lc-batch-k{font-size:8px;letter-spacing:.2em}
+  .lc-batch-n{font-family:var(--font-display);font-size:30px;line-height:.6;color:var(--red)}
+  .lc-r2{font-size:10px;letter-spacing:.22em}
+  .lc-r3{align-items:stretch}
+  .lc-cell{display:flex;flex-direction:column;gap:2px;flex:1}
+  .lc-big{font-family:var(--font-display);font-size:20px;line-height:.6}
+  .lc-sm{font-size:8px;letter-spacing:.2em;color:var(--ink-soft)}
+  .lc-diet{text-align:right;align-items:flex-end;font-size:9px;letter-spacing:.13em;line-height:1.5}
+  .lc-r4{flex-direction:column;gap:4px;flex:1;min-height:0;overflow:hidden}
+  .lc-ings{
+    font-size:9.5px;font-weight:300;line-height:1.5;color:var(--ink-soft);
+    padding-right:22px;
+    display:-webkit-box;-webkit-box-orient:vertical;-webkit-line-clamp:3;overflow:hidden;
+  }
+  .lc-stamp{
+    position:absolute;right:20px;bottom:16px;z-index:2;
+    width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+    font-size:13px;color:var(--ink);border-radius:50%;
+    box-shadow:inset 0 0 0 1px var(--paper-edge);
+  }
+
+  /* right — detail column: masked scroll region + pinned tags/actions */
+  .rv-detail{display:flex;flex-direction:column;gap:var(--space-5);max-height:80vh}
+  .rv-scroll{
+    flex:1;min-height:0;overflow-y:auto;overscroll-behavior:contain;
+    scrollbar-width:none;
+    display:flex;flex-direction:column;gap:var(--space-4);
+    padding:2px 0;
+  }
+  .rv-scroll.masked{
+    -webkit-mask-image:linear-gradient(to bottom,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%);
+            mask-image:linear-gradient(to bottom,transparent 0,#000 26px,#000 calc(100% - 26px),transparent 100%);
+  }
+  .rv-scroll::-webkit-scrollbar{display:none}
+  .rv-title{font-family:var(--font-display);font-weight:400;font-size:clamp(2rem,4vw,3rem);line-height:.6}
+  .rv-desc{color:var(--tint);font-size:15px;font-weight:var(--fw-light);line-height:1.75}
+  .rv-sec-h{font-family:var(--font-display);font-weight:400;font-size:36px;line-height:.6;margin-top:var(--space-3)}
+  .rv-steps{display:flex;flex-direction:column;gap:var(--space-2)}
+  .rv-step{display:grid;gap:var(--space-1)}
+  .rv-step-n{font-family:var(--font-mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--orange)}
+  .rv-step-b{font-size:14px;line-height:1.7;color:var(--paper)}
+  .rv-notes{font-size:14px;line-height:1.7;color:var(--paper);white-space:pre-wrap}
+  .rv-notes.empty{color:var(--tint);font-weight:var(--fw-light)}
+  /* tag row + action row each stay on a single line — never wrap */
+  .rv-tags{display:flex;flex-wrap:nowrap;gap:var(--space-1);flex:none;min-width:0}
+  .rv-tag{
+    flex:0 0 auto;
+    font-family:var(--font-mono);font-size:8px;letter-spacing:.02em;line-height:1.3;
+    background:var(--orange);color:var(--ink);padding:2px 6px;border-radius:var(--radius-btn);
+  }
+  .rv-actions{display:flex;flex-wrap:nowrap;gap:var(--space-3);flex:none;min-width:0;white-space:nowrap}
+  .rv-action{
+    flex:0 0 auto;
+    display:inline-flex;align-items:center;gap:var(--space-1);
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.03em;color:var(--paper);
+    transition:color var(--dur-state) var(--ease-liminal);
+  }
+  .rv-action .rv-action-t{text-decoration:underline;text-underline-offset:3px}
+  .rv-action:hover{color:var(--orange)}
+  .rv-action:focus-visible{outline:none;box-shadow:inset 0 -2px 0 0 var(--orange)}
+  /* Export → format menu (PDF / JPEG), a small popover above the action */
+  .rv-export{position:relative}
+  .rv-export-menu{
+    position:absolute;left:0;bottom:calc(100% + 8px);z-index:70;
+    display:flex;flex-direction:column;min-width:96px;
+    background:var(--brown-20);border-radius:var(--radius-btn);overflow:hidden;
+    box-shadow:0 14px 34px rgba(0,0,0,.45);
+  }
+  .rv-export-menu button{
+    font-family:var(--font-mono);font-size:12px;letter-spacing:.06em;color:var(--paper);
+    background:transparent;border:0;padding:10px 18px;text-align:left;cursor:pointer;white-space:nowrap;
+    transition:background var(--dur-state) var(--ease-liminal),color var(--dur-state) var(--ease-liminal);
+  }
+  .rv-export-menu button:hover{background:var(--brown-30);color:var(--orange)}
+  .rv-export-menu button:focus-visible{outline:none;box-shadow:inset 0 -2px 0 0 var(--orange)}
+
+  @media (max-width:1040px){
+    .rv{grid-template-columns:1fr;gap:var(--space-6);padding-top:112px;justify-items:center}
+    /* the stage is a positioned context — give it an explicit width so it doesn't
+       collapse to 0 under justify-items:center in the single-column layout */
+    .rv-stage{width:min(100%,400px)}
+    .rv-labels{flex-direction:row;max-height:none;max-width:100%;overflow-x:auto;gap:var(--space-5);
+      -webkit-mask-image:linear-gradient(to right,transparent,#000 28px,#000 calc(100% - 28px),transparent);
+              mask-image:linear-gradient(to right,transparent,#000 28px,#000 calc(100% - 28px),transparent)}
+    .rv-label{white-space:nowrap}
+    .rv-detail{max-height:none;width:min(100%,440px)}
+    .rv-scroll{-webkit-mask-image:none;mask-image:none}
+    /* keep the tag + action rows single-line at narrow widths by tightening, never wrapping */
+    .rv-actions{gap:var(--space-2)}
+    .rv-action{font-size:11px}
+  }
 
   @media (max-width:900px){
     .gen-grid{grid-template-columns:1fr}
-    .rv-grid{grid-template-columns:1fr;padding-top:3.4rem;padding-bottom:6.5rem}
-    .rv-list,.rv-instructions{position:static;max-height:none}
-    .rv-list .scroll{max-height:40vh}
-    .rv-instructions .rv-steps{-webkit-mask-image:none;mask-image:none;max-height:none}
   }
   @media (max-width:760px){
     .topbar{flex-wrap:wrap;gap:.6rem}
-    /* the 3D ring collapses to a plain vertical stack on small screens */
-    .ring-view{overflow:visible;min-height:auto;padding:6rem 0 3rem}
-    .ring-stage{position:static;overflow:visible;display:block;height:auto;padding:0 var(--space);perspective:none}
-    .ring-preview,.lib-controls{display:none !important}
-    .ring{position:static !important;display:flex;flex-direction:column;gap:.8rem;width:auto;height:auto;transform:none !important}
-    .orbit{position:static !important;transform:none !important;width:100% !important;height:auto !important;
-      margin:0 !important;opacity:1 !important;transition:none}
-    .idx-card{height:auto;padding:var(--space-3);gap:.4rem}
-    .idx-card .nm{font-size:1rem}
-    .idx-card .tg{white-space:normal}
-    .ring-meta{position:static;max-width:none;margin:0 var(--space) 1.2rem}
-    .filter-dock{position:static;width:auto;margin:1.4rem var(--space) 0;box-shadow:none}
-    .tag-list{max-height:none}
-    .ring-empty{position:static;min-height:50vh}
-    .rv-nav .pill{padding:.45rem .7rem;font-size:12px}
-  }
-  @media print{
-    .topbar,.rv-nav,.rv-list,.rv-instructions,.rv-actions,.rv-tags,.rv-title,
-    .flip-hint,.filter-dock,.ring-meta,.gen-actions{display:none !important}
-    body,#app{background:#fff}
-    .rv-grid{display:block;padding:0}
-    .flip{width:100%;perspective:none}
-    .flip-inner{transform:none !important}
-    .flip-face.back{display:none}
-    .flip-face{box-shadow:none;border-color:#000;overflow:visible}
-    .graph{transform:none !important}
-    .graph-wrap{width:auto !important;height:auto !important;overflow:visible}
+    .topbar nav{gap:var(--space-4)}
   }
 </style>
 </head>
 <body>
 <div id="app"></div>
 <div class="toast" id="toast"></div>
+
+<!-- ink-bleed: subtle displacement on the label face's text + rules (layered on the
+     existing typefaces, not a font swap). Applied via .lc-ink { filter:url(#rv-inkbleed) }. -->
+<svg width="0" height="0" style="position:absolute;pointer-events:none" aria-hidden="true">
+  <filter id="rv-inkbleed" x="-3%" y="-3%" width="106%" height="106%">
+    <feTurbulence type="fractalNoise" baseFrequency="0.014 0.024" numOctaves="2" seed="7" result="n" />
+    <feDisplacementMap in="SourceGraphic" in2="n" scale="1.7" xChannelSelector="R" yChannelSelector="G" />
+  </filter>
+</svg>
 
 <script>
 (function(){
@@ -460,6 +496,9 @@ function seed(){
   var mk=function(o){o.id="r"+(++_n);o.createdAt=Date.now()+_n;return o;};
   var db={recipes:[
     mk({title:"Espresso Brownies",sourceUrl:"",yield:"Makes 16 squares",totalTime:"50 min",activeTime:"15 min",
+      category:"Dessert",
+      description:"Fudgy espresso brownies — the coffee sharpens the chocolate without ever reading as coffee.",
+      notes:"",
       tags:["dessert","chocolate","vegetarian","weekend"],
       ingredients:["4 oz unsalted butter","1 cup sugar","1/4 tsp vanilla extract","1 shot fresh brewed espresso",
         "2 large eggs","1/2 cup all-purpose flour","1/3 cup cocoa powder","1/4 tsp baking soda","1/4 tsp table salt"],
@@ -468,6 +507,9 @@ function seed(){
         "Whisk together the flour, cocoa powder, baking soda, and salt in a separate bowl",
         "Fold the dry ingredients into the wet","Bake at 350°F for 30 to 40 minutes"]}),
     mk({title:"Weeknight Miso Ramen",sourceUrl:"",yield:"Serves 2",totalTime:"25 min",activeTime:"25 min",
+      category:"Entrees",
+      description:"A fast bowl: aromatics bloomed in sesame oil, miso worked to a paste, broth kept just under a simmer.",
+      notes:"",
       tags:["dinner","soup","quick","vegetarian"],
       ingredients:["1 tbsp sesame oil","2 cloves garlic, minced","1 tbsp grated ginger","3 tbsp white miso",
         "4 cups vegetable broth","2 portions ramen noodles","2 soft-boiled eggs","2 cups baby spinach","2 scallions, sliced"],
@@ -476,12 +518,18 @@ function seed(){
         "Cook the ramen noodles in the broth for 3 minutes","Fold in the spinach until wilted",
         "Serve topped with the eggs and scallions"]}),
     mk({title:"No-Knead Country Loaf",sourceUrl:"",yield:"1 large loaf",totalTime:"18 hr",activeTime:"20 min",
+      category:"Appetizers",
+      description:"The classic overnight loaf — a wet dough, a long cool rise, a covered pot for the oven spring.",
+      notes:"",
       tags:["bread","vegan","make-ahead","weekend"],
       ingredients:["500 g bread flour","10 g fine sea salt","1 g instant yeast","375 g cool water","10 g rice flour for dusting"],
       steps:["Whisk together the bread flour, salt, and yeast","Mix in the water until no dry flour remains",
         "Rest the dough covered for 14 hours at room temperature","Roll the dough into a taut round",
         "Rest the shaped dough for 2 hours","Bake in a covered pot at 475°F for 45 minutes"]}),
     mk({title:"Chopped Winter Salad",sourceUrl:"",yield:"Serves 4",totalTime:"15 min",activeTime:"15 min",
+      category:"Appetizers",
+      description:"Bitter radicchio, sweet apple, toasted walnuts, and a maple-mustard vinaigrette that holds its own.",
+      notes:"",
       tags:["salad","vegan","gluten-free","quick"],
       ingredients:["3 tbsp olive oil","1 tbsp cider vinegar","1 tsp maple syrup","1/2 tsp dijon mustard",
         "1 head radicchio, chopped","2 apples, diced","1/2 cup toasted walnuts","1/3 cup dried cranberries"],
@@ -489,12 +537,18 @@ function seed(){
         "Toss the radicchio and apples with the dressing","Fold in the walnuts and cranberries",
         "Rest 5 minutes before serving"]}),
     mk({title:"Almond Sea Salt Bark",sourceUrl:"",yield:"60 grams per piece",totalTime:"40 min",activeTime:"15 min",
+      category:"Dessert",
+      description:"Bittersweet chocolate set with roasted almonds and flaky salt — a fridge project, not a candy-thermometer one.",
+      notes:"",
       tags:["dessert","chocolate","vegan","gluten-free"],
       ingredients:["200 g bittersweet chocolate","1/2 cup roasted almonds","1 tsp flaky sea salt"],
       steps:["Melt the bittersweet chocolate over a double boiler","Stir in half of the almonds",
         "Pour the chocolate onto a lined sheet","Sprinkle with the remaining almonds and the sea salt",
         "Chill until set, about 20 minutes"]}),
     mk({title:"Charred Scallion Fried Rice",sourceUrl:"",yield:"Serves 3",totalTime:"20 min",activeTime:"20 min",
+      category:"Entrees",
+      description:"Day-old rice, scallions cooked hard until the edges char, egg scrambled in the cleared well of the pan.",
+      notes:"",
       tags:["dinner","quick","vegetarian"],
       ingredients:["2 tbsp neutral oil","6 scallions, cut in batons","3 cups day-old rice","2 eggs, beaten",
         "2 tbsp soy sauce","1 tsp toasted sesame oil","1/2 tsp white pepper"],
@@ -633,8 +687,6 @@ function buildGraph(recipe){
 
 /* ============================================================ render helpers */
 function el(tag,cls,txt){var e=document.createElement(tag);if(cls)e.className=cls;if(txt!=null)e.textContent=txt;return e;}
-function slug(s){return (s||"recipe").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"");}
-function batchNo(r){var i=DB.recipes.findIndex(function(x){return x.id===r.id;});return String((i<0?DB.recipes.length:i)+1).padStart(3,"0");}
 function toast(msg){var t=document.getElementById("toast");t.textContent=msg;t.classList.add("show");clearTimeout(t._h);t._h=setTimeout(function(){t.classList.remove("show");},1800);}
 
 function renderGraph(recipe,opts){
@@ -670,129 +722,54 @@ function renderGraph(recipe,opts){
   return wrap;
 }
 
-function fitGraph(wrap,avail,maxH){
-  var g=wrap.firstChild;if(!g||!avail)return;
-  g.style.transform="";wrap.style.width="";wrap.style.height="";
-  var nw=g.scrollWidth,nh=g.scrollHeight;
-  g._nw=nw;g._nh=nh;
-  var s=Math.min((avail-10)/nw,maxH?maxH/nh:1,1);
-  g._scale=s;
-  if(s<1){
-    g.style.transformOrigin="top left";
-    g.style.transform="scale("+s+")";
-    wrap.style.width=(nw*s)+"px";wrap.style.height=(nh*s)+"px";
-  }
-}
-function whenReady(fn){
-  requestAnimationFrame(fn);
-  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){requestAnimationFrame(fn);});
-  setTimeout(fn,400);setTimeout(fn,1100);
-}
-
-function icon(name){
-  var p={
-    export:'<path d="M8 1l3.5 3.5M8 1L4.5 4.5M8 1v10M2 9v5h12V9" fill="none" stroke="currentColor" stroke-width="1.4"/>',
-    print:'<path d="M4 6V2h8v4M4 12H2V6h12v6h-2M4 10h8v4H4z" fill="none" stroke="currentColor" stroke-width="1.4"/>',
-    copy:'<path d="M5 5V2h9v9h-3M2 5h9v9H2z" fill="none" stroke="currentColor" stroke-width="1.4"/>',
-    trash:'<path d="M2 4h12M6 4V2h4v2M4 4l1 10h6l1-10" fill="none" stroke="currentColor" stroke-width="1.4"/>',
-    pencil:'<path d="M12 2l4 4-9 9-4 1 1-4 8-8z" fill="none" stroke="currentColor" stroke-width="1.4"/>'
-  }[name]||"";
-  return '<svg viewBox="0 0 16 16" aria-hidden="true">'+p+'</svg>';
-}
-
-function renderCard(recipe,flipped){
-  var flip=el("div","flip"+(flipped?" flipped":""));
-  var inner=el("div","flip-inner");
-
-  // FRONT — the graph artifact
-  var front=el("div","flip-face front");
-  var head=el("div","card-head");
-  var hn=el("div","ch-name",recipe.title);
-  var hb=el("div","ch-bn");hb.innerHTML="Batch no. <b>"+batchNo(recipe)+"</b>";
-  head.appendChild(hn);head.appendChild(hb);
-  var body=el("div","card-body");
-  var gwrap=renderGraph(recipe);
-  body.appendChild(gwrap);
-  flip._gwrap=gwrap;
-  whenReady(function(){fitGraph(gwrap,(flip.clientWidth||480)-32,null);});
-  var foot=el("div","card-foot");
-  foot.appendChild(el("span",null,recipe.yield||""));
-  foot.appendChild(el("span",null,(recipe.totalTime||"")+(recipe.sourceUrl?"  ·  source":"")));
-  front.appendChild(head);front.appendChild(body);front.appendChild(foot);
-
-  // BACK — the label
-  var back=el("div","flip-face back");
-  var lab=el("div","label");
-  var top=el("div","l-top");
-  top.appendChild(el("div","l-name",recipe.title));
-  var lb=el("div","l-batch");lb.innerHTML="Batch<br>no. <b>"+batchNo(recipe)+"</b>";
-  top.appendChild(lb);
-  lab.appendChild(top);
-  lab.appendChild(el("hr"));
-  var g=buildGraph(recipe);
-  var r1=el("div","l-row");
-  r1.appendChild(el("div","l-yield",(recipe.yield||(g.rows.length+" ingredients")).toUpperCase()));
-  lab.appendChild(r1);
-  lab.appendChild(el("hr"));
-  var r2=el("div","l-row");
-  var stat=el("div","l-stat");
-  stat.appendChild(el("span","big",(recipe.totalTime||"—").replace(/\s*min/,"")));
-  stat.appendChild(el("span","cap",(recipe.totalTime&&/min/.test(recipe.totalTime))?"MINUTES\nTOTAL":"TOTAL\nTIME"));
-  stat.querySelector(".cap").style.whiteSpace="pre";
-  r2.appendChild(stat);
-  var diet=recipe.tags.filter(function(t){return /vegan|vegetarian|gluten|dairy|nut-free|keto|paleo|whole30/i.test(t);});
-  r2.appendChild(el("div","l-diet",(diet.length?diet.join(" AND "):"NO ALLERGEN\nDATA").toUpperCase()));
-  r2.querySelector(".l-diet").style.whiteSpace="pre-line";
-  lab.appendChild(r2);
-  lab.appendChild(el("hr"));
-  var ling=el("div","l-ing");
-  ling.appendChild(el("h5",null,"Ingredients"));
-  ling.appendChild(el("p",null,g.ings.map(function(i){return i.name;}).join(", ")+"."));
-  lab.appendChild(ling);
-  var mark=document.createElementNS("http://www.w3.org/2000/svg","svg");
-  mark.setAttribute("viewBox","0 0 48 48");mark.setAttribute("class","l-mark");
-  mark.innerHTML='<circle cx="24" cy="18" r="13" fill="none" stroke="#3F000F" stroke-width="1.6"/><path d="M17 28l-4 16 11-6 11 6-4-16" fill="none" stroke="#3F000F" stroke-width="1.6"/>';
-  lab.appendChild(mark);
-  back.appendChild(lab);
-
-  inner.appendChild(front);inner.appendChild(back);
-  flip.appendChild(inner);
-  inner.addEventListener("click",function(e){
-    if(e.target.closest("a"))return;
-    flip.classList.toggle("flipped");
-  });
-  return flip;
-}
-
-/* ============================================================ export */
-function exportCard(faceEl,name){
-  if(!window.html2canvas){toast("Export unavailable");return;}
-  toast("Rendering PNG…");
-  // temporarily render the graph at full resolution
-  var g=faceEl.querySelector(".graph"),wrap=g&&g.parentNode,saved=null;
-  if(g&&g.style.transform){
-    saved={t:g.style.transform,w:wrap.style.width,h:wrap.style.height};
-    g.style.transform="";wrap.style.width="";wrap.style.height="";
-  }
-  var restore=function(){if(saved){g.style.transform=saved.t;wrap.style.width=saved.w;wrap.style.height=saved.h;}};
-  html2canvas(faceEl,{backgroundColor:"#EDE9E3",scale:2,useCORS:true}).then(function(canvas){
-    restore();
-    var a=document.createElement("a");
-    a.download=name+".png";a.href=canvas.toDataURL("image/png");a.click();
-    toast("Saved "+a.download);
-  }).catch(function(){restore();toast("Export failed");});
+/* ============================================================ export (graph → JPEG / PDF) */
+function slug(s){return String(s||"recipe").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-+|-+$/g,"")||"recipe";}
+function doExport(recipe,fmt){
+  if(!window.RecidexExport||!window.RecidexExport.ready){toast("Export is still loading…");return;}
+  toast("Rendering "+fmt.toUpperCase()+"…");
+  // full-resolution graph, off-screen, with the drop shadow stripped for a clean capture
+  var host=el("div");
+  host.style.cssText="position:fixed;left:-10000px;top:0;background:var(--paper);padding:24px";
+  var wrap=renderGraph(recipe);
+  var g=wrap.querySelector(".graph");
+  if(g)g.style.boxShadow="none";
+  host.appendChild(wrap);
+  document.body.appendChild(host);
+  var name=slug(recipe.title)+"-graph";
+  var cleanup=function(){if(host.parentNode)host.parentNode.removeChild(host);};
+  var fontsReady=(document.fonts&&document.fonts.ready)?document.fonts.ready:Promise.resolve();
+  fontsReady
+    .then(function(){return new Promise(function(res){requestAnimationFrame(function(){requestAnimationFrame(res);});});})
+    .then(function(){
+      var fn=fmt==="pdf"?window.RecidexExport.pdf:window.RecidexExport.jpeg;
+      return fn.call(window.RecidexExport,g||wrap,name);
+    })
+    .then(function(){cleanup();toast("Saved "+name+"."+fmt);})
+    .catch(function(err){console.error("export failed",err);cleanup();toast("Export failed");});
 }
 
 /* ============================================================ router */
 function go(hash){location.hash=hash;}
 function currentRoute(){
   var h=location.hash.replace(/^#/,"");
-  if(!h||h==="/"||h==="/library")return {name:"library"};
-  var m=h.match(/^\/recipe\/(.+)$/);
-  if(m)return {name:"recipe",id:m[1]};
   if(h==="/new")return {name:"new"};
+  var me=h.match(/^\/edit\/(.+)$/);
+  if(me)return {name:"new",editId:decodeURIComponent(me[1])};
+  var m=h.match(/^\/recipe\/(.+)$/);
+  if(m)return {name:"recipe",id:decodeURIComponent(m[1])};
   return {name:"library"};
 }
+var CATEGORIES=["Appetizers","Entrees","Dessert","Drinks","Sauce & Seasoning"];
+var CAT_LABEL={"Appetizers":"Appetizer","Entrees":"Entree","Dessert":"Dessert","Drinks":"Drink","Sauce & Seasoning":"Seasoning"};
+
+/* freeze-frame handoff between the WebGL ring/carousel and the DOM recipe view:
+   `pendingSnap` = { url, rect } captured the instant the forward morph finishes;
+   `render()` floats it over the incoming view and cross-fades. `prevRouteName`
+   lets render() tell a recipe→library step (reverse handoff) from a fresh load. */
+var pendingSnap=null;
+var prevRouteName=null;
+var HANDOFF_MS=240;   // cross-fade window
+
 window.addEventListener("hashchange",render);
 window.addEventListener("DOMContentLoaded",render);
 
@@ -800,517 +777,463 @@ window.addEventListener("DOMContentLoaded",render);
 function topbar(){
   var bar=el("div","topbar");
   var brand=el("div","brand");
-  var s=el("span","striped sm");s.textContent="Recipe Graph";
+  var s=el("span","striped sm");s.textContent="Recidex";
   brand.appendChild(s);
   brand.onclick=function(){go("/library");};
   var nav=el("nav");
   var lib=el("button","pill ghost","Library");lib.onclick=function(){go("/library");};
-  var nw=el("button","pill red","+ New Recipe");nw.onclick=function(){go("/new");};
+  var nw=el("button","pill red","+ Add new");nw.onclick=function(){go("/new");};
   nav.appendChild(lib);nav.appendChild(nw);
   bar.appendChild(brand);bar.appendChild(nav);
   return bar;
 }
 
-/* ============================================================ LIBRARY (cascade↔ring layout engine) */
-var ringState={tags:[],q:""};
-/* zoom/auto-assemble are UI preferences the user toggles — kept at module scope
-   so they persist for the session (survive leaving/returning to the library),
-   but not written to localStorage. */
-var libPrefs={autoScroll:true,zoom:1,autoRotate:true};
-
-/* ---- tunable layout constants (not magic numbers) ---- */
-var LAYOUT={
-  cardSize:136,        // card width, px, before zoom
-  cardAspect:0.74,      // height = cardSize * cardAspect (tall enough that name+tags never clip)
-  ringRadius:500,       // px, before zoom
-  stepX:44,             // cascade: px between cards, x
-  stepY:32,             // cascade: px between cards, y
-  rotationOffset:-Math.PI/2,  // ring: initial angle of card 0 (top)
-  rotateSpeed:(Math.PI*2)/(75*60),  // rad/frame @60fps — full orbit in ~75s
-  pushRadius:250,       // px — cursor push-field falloff distance
-  pushStrength:80,      // px — max displacement at zero distance
-  centerX:0,centerY:0   // stage-local, recomputed on resize
-};
-/* live ring rotation angle — advances continuously in tick() (independent of
-   scroll/cursor); module-scope so it keeps spinning in place across
-   leaving/returning to the library, and holds exactly when paused */
-var ringAngle=LAYOUT.rotationOffset;
-
-/* the core positioning function: index + count + mode → {x,y,scale}, all
-   stage-local px, relative to LAYOUT.centerX/centerY */
-/* the ring is a perfect circle, so its radius is capped to whatever fits
-   inside the stage on its shorter axis — LAYOUT.ringRadius is still the
-   "ideal" tunable value, this just keeps it from clipping off small/wide
-   viewports before zoom is applied on top */
-function effRingRadius(){
-  var fit=Math.min(LAYOUT.centerX,LAYOUT.centerY)-LAYOUT.cardSize*0.95;
-  return Math.max(120,Math.min(LAYOUT.ringRadius,fit))*libPrefs.zoom;
+/* ============================================================ LIBRARY (R3F ring island) */
+function libLoading(boot){
+  var w=el("div","lib-loading");
+  w.appendChild(el("div","eyebrow",boot?"Loading the library":"Composing · new batch"));
+  var lines=boot
+    ? ["initializing perspective camera","building the category ring","placing "+DB.recipes.length+" cards"]
+    : ["structuring ingredients and steps","matching verbs to process columns","placing the card in its segment"];
+  lines.forEach(function(t,i){
+    var d=el("div","line"+(i===lines.length-1?" live":""),t);
+    if(i===lines.length-1)d.appendChild(el("span","caret"));
+    w.appendChild(d);
+  });
+  return w;
 }
-function cardPos(i,count,mode){
-  if(mode==="cascade"){
-    return {
-      x:LAYOUT.centerX + i*LAYOUT.stepX*libPrefs.zoom,
-      y:LAYOUT.centerY - i*LAYOUT.stepY*libPrefs.zoom,
-      scale:1
-    };
-  }
-  var angle=(i/Math.max(count,1))*Math.PI*2 + ringAngle;
-  var R=effRingRadius();
-  return {
-    x:LAYOUT.centerX + R*Math.cos(angle),
-    y:LAYOUT.centerY + R*Math.sin(angle),
-    scale:1   // frontal ring — no depth falloff, every card reads the same
-  };
+
+function peerIdsFor(id){
+  var rec=null;DB.recipes.forEach(function(x){if(x.id===id)rec=x;});
+  var cat=rec?(rec.category||CATEGORIES[0]):CATEGORIES[0];
+  var out=[];
+  DB.recipes.forEach(function(x){if((x.category||CATEGORIES[0])===cat)out.push(x.id);});
+  return out;
 }
-function lerp(a,b,t){return a+(b-a)*t;}
-function easeInOutCubic(t){return t<0.5 ? 4*t*t*t : 1-Math.pow(-2*t+2,3)/2;}
 
 function viewLibrary(root){
   root.appendChild(topbar());
-  var view=el("div","ring-view");
 
-  var recipes=DB.recipes.slice();
-  var allTags={};
-  DB.recipes.forEach(function(r){r.tags.forEach(function(t){allTags[t]=(allTags[t]||0)+1;});});
-
-  function filtered(){
-    return recipes.filter(function(r){
-      var okTag=!ringState.tags.length||ringState.tags.some(function(t){return r.tags.indexOf(t)>=0;});
-      var q=ringState.q.trim().toLowerCase();
-      var okQ=!q||(r.title.toLowerCase().indexOf(q)>=0
-        ||r.tags.join(" ").toLowerCase().indexOf(q)>=0
-        ||(r.ingredients||[]).join(" ").toLowerCase().indexOf(q)>=0);
-      return okTag&&okQ;
-    });
+  // just generated a recipe → hold on a loading screen, then re-render into the ring
+  var genId=null;try{genId=sessionStorage.getItem("recidex-generating");}catch(e){}
+  if(genId){
+    try{sessionStorage.removeItem("recidex-morph");}catch(e){}
+    root.appendChild(libLoading(false));
+    setTimeout(function(){
+      try{sessionStorage.removeItem("recidex-generating");}catch(e){}
+      if(currentRoute().name==="library")render();
+    },1400);
+    return;
   }
 
-  var meta=el("div","ring-meta");
-  var mc=el("div","count");
-  meta.appendChild(mc);
-  var reset=el("button","filter-clear","Reset library");
-  reset.style.marginTop=".6rem";
-  reset.onclick=function(){if(confirm("Replace your library with the sample set?")){DB=seed();save();render();}};
-  meta.appendChild(reset);
-  view.appendChild(meta);
-
-  var stage=el("div","ring-stage");
-  var ring=el("div","ring");
-  var preview=el("div","ring-preview");
-  ring.appendChild(preview);
-  stage.appendChild(ring);
-  view.appendChild(stage);
-
-  /* ---- auto-assemble toggle + zoom, near the filter dock ---- */
-  var controls=el("div","lib-controls");
-  var autoRow=el("div","row");
-  autoRow.appendChild(el("span","row-label","Auto-assemble"));
-  var toggle=el("button","switch"+(libPrefs.autoScroll?" on":""));
-  toggle.type="button";toggle.setAttribute("role","switch");
-  toggle.setAttribute("aria-checked",libPrefs.autoScroll?"true":"false");
-  toggle.appendChild(el("span","knob"));
-  toggle.onclick=function(){
-    libPrefs.autoScroll=!libPrefs.autoScroll;
-    toggle.classList.toggle("on",libPrefs.autoScroll);
-    toggle.setAttribute("aria-checked",libPrefs.autoScroll?"true":"false");
-  };
-  autoRow.appendChild(toggle);
-  controls.appendChild(autoRow);
-
-  var rotRow=el("div","row");
-  rotRow.appendChild(el("span","row-label","Auto-rotate"));
-  var rotToggle=el("button","switch"+(libPrefs.autoRotate?" on":""));
-  rotToggle.type="button";rotToggle.setAttribute("role","switch");
-  rotToggle.setAttribute("aria-checked",libPrefs.autoRotate?"true":"false");
-  rotToggle.appendChild(el("span","knob"));
-  rotToggle.onclick=function(){
-    libPrefs.autoRotate=!libPrefs.autoRotate;
-    rotToggle.classList.toggle("on",libPrefs.autoRotate);
-    rotToggle.setAttribute("aria-checked",libPrefs.autoRotate?"true":"false");
-  };
-  rotRow.appendChild(rotToggle);
-  controls.appendChild(rotRow);
-
-  var zoomRow=el("div","row");
-  zoomRow.appendChild(el("span","row-label","Zoom"));
-  var zg=el("div","zoom-group");
-  var zOut=el("button","zoom-btn","–");zOut.type="button";
-  var zLabel=el("span","zoom-label",Math.round(libPrefs.zoom*100)+"%");
-  var zIn=el("button","zoom-btn","+");zIn.type="button";
-  function setZoom(z){
-    libPrefs.zoom=Math.max(0.6,Math.min(1.6,z));
-    zLabel.textContent=Math.round(libPrefs.zoom*100)+"%";
-  }
-  zOut.onclick=function(){setZoom(libPrefs.zoom-0.1);};
-  zIn.onclick=function(){setZoom(libPrefs.zoom+0.1);};
-  zg.appendChild(zOut);zg.appendChild(zLabel);zg.appendChild(zIn);
-  zoomRow.appendChild(zg);
-  controls.appendChild(zoomRow);
-  view.appendChild(controls);
-
-  /* ---- filter dock — untouched ---- */
-  var dock=el("div","filter-dock");
-  var h4=el("h4");h4.innerHTML='Filter <span></span>';
-  dock.appendChild(h4);
-  var search=el("input","tag-search");search.type="search";search.placeholder="search recipes…";
-  search.value=ringState.q;
-  search.oninput=function(){ringState.q=search.value;paint();};
-  dock.appendChild(search);
-  var tl=el("div","tag-list");
-  dock.appendChild(tl);
-  var clr=el("button","filter-clear","Clear filters");
-  clr.onclick=function(){ringState.tags=[];ringState.q="";search.value="";paint();};
-  dock.appendChild(clr);
-  view.appendChild(dock);
-
-  root.appendChild(view);
-
-  function buildTagList(){
-    tl.innerHTML="";
-    Object.keys(allTags).sort().forEach(function(t){
-      var c=el("button","tag-chip"+(ringState.tags.indexOf(t)>=0?" on":""));
-      c.innerHTML=t+" <b>"+allTags[t]+"</b>";
-      c.onclick=function(){
-        var i=ringState.tags.indexOf(t);
-        if(i>=0)ringState.tags.splice(i,1);else ringState.tags.push(t);
-        paint();
-      };
-      tl.appendChild(c);
-    });
-  }
-
-  var cur={list:[]};
-  var cardEls={},cardState={};
-  var mouse={x:0,y:0,active:false};
-  var scroll={progress:0,lastManual:0,autoDir:1};
-  function setProgress(p){scroll.progress=Math.max(0,Math.min(1,p));scroll.lastManual=Date.now();}
-
-  function updateCenter(){
-    var r=stage.getBoundingClientRect();
-    /* bias down a bit so the top of the assembled ring clears the fixed topbar */
-    LAYOUT.centerX=r.width/2;LAYOUT.centerY=r.height/2+28;
-  }
-  updateCenter();
-
-  /* cursor push-field: displacement away from the cursor, falling off with distance */
-  function pushOffset(bx,by){
-    if(!mouse.active)return {x:0,y:0};
-    var dx=bx-mouse.x,dy=by-mouse.y,dist=Math.sqrt(dx*dx+dy*dy);
-    if(dist>=LAYOUT.pushRadius||dist<1)return {x:0,y:0};
-    var falloff=1-dist/LAYOUT.pushRadius;
-    var f=LAYOUT.pushStrength*libPrefs.zoom*falloff;
-    return {x:(dx/dist)*f,y:(dy/dist)*f};
-  }
-
-  function makeOrbit(r){
-    var o=el("div","orbit");o.dataset.id=r.id;
-    var card=el("div","idx-card");
-    var bn=el("div","bn");bn.innerHTML="Batch no. <b>"+String(DB.recipes.findIndex(function(x){return x.id===r.id;})+1).padStart(3,"0")+"</b>";
-    card.appendChild(bn);
-    card.appendChild(el("div","nm",r.title));
-    card.appendChild(el("div","tg",r.tags.slice(0,3).join(" / ")));
-    card.onclick=function(){go("/recipe/"+r.id);};
-    card.addEventListener("pointerenter",function(){showPreview(r);});
-    card.addEventListener("pointerleave",function(){scheduleHidePreview();});
-    o.appendChild(card);
-    return o;
-  }
-
-  function addCard(r,i){
-    var o=makeOrbit(r);
-    ring.insertBefore(o,preview);
-    var p=cardPos(i,cur.list.length,"cascade");
-    cardEls[r.id]=o;
-    cardState[r.id]={x:p.x,y:p.y};
-    o.style.opacity="0";
-    requestAnimationFrame(function(){o.style.opacity="1";});
-  }
-  function removeCard(id){
-    var o=cardEls[id];if(!o)return;
-    o.style.opacity="0";
-    setTimeout(function(){if(o.parentNode)o.parentNode.removeChild(o);},340);
-    delete cardEls[id];delete cardState[id];
-  }
-
-  /* ---- center hover-reveal (only once the ring is close to assembled) ---- */
-  var hideT=null;
-  function showPreview(r){
-    if(easeInOutCubic(scroll.progress)<0.75)return;
-    clearTimeout(hideT);
-    preview.innerHTML="";
-    preview.appendChild(el("div","pv-name",r.title));
-    var gwrap=renderGraph(r,{mini:true});
-    preview.appendChild(gwrap);
-    preview.onclick=function(){go("/recipe/"+r.id);};
-    preview.classList.add("show");
-    whenReady(function(){fitGraph(gwrap,preview.clientWidth-32,220);});
-  }
-  function hidePreviewNow(){preview.classList.remove("show");}
-  function scheduleHidePreview(){clearTimeout(hideT);hideT=setTimeout(hidePreviewNow,90);}
-
-  function showEmpty(){
-    Object.keys(cardEls).forEach(removeCard);
-    cur.list=[];
-    var e=el("div","ring-empty");
-    var t=el("div","striped");t.style.fontSize="clamp(1.4rem,5vw,2.6rem)";
-    t.textContent=recipes.length?"No matches":"Empty library";
-    e.appendChild(t);
-    var sub=el("p");sub.style.cssText="max-width:22rem;color:var(--color-ink-soft);font-size:.9rem";
-    sub.textContent=recipes.length?"No recipe matches these filters.":"Paste a recipe to generate your first graph.";
-    e.appendChild(sub);
-    var b=el("button","pill red",recipes.length?"Clear filters":"+ New recipe");
-    b.onclick=function(){if(recipes.length){ringState.tags=[];ringState.q="";search.value="";paint();}else go("/new");};
-    e.appendChild(b);stage.appendChild(e);
-  }
-
-  function paint(){
-    var list=filtered();
-    h4.querySelector("span").textContent=list.length+" / "+recipes.length;
-    mc.textContent=DB.recipes.length+" recipes  ·  "+Object.keys(allTags).length+" labels";
-    buildTagList();
-    var empty=stage.querySelector(".ring-empty");if(empty)empty.remove();
-
-    if(!list.length){showEmpty();return;}
-
-    var newIds={};list.forEach(function(r){newIds[r.id]=1;});
-    Object.keys(cardEls).forEach(function(id){if(!newIds[id])removeCard(id);});
-    list.forEach(function(r,i){if(!cardEls[r.id])addCard(r,i);});
-    cur.list=list;
-  }
-
-  /* ---- render loop: damped-follow toward the lerp(cascade,ring) target + push field ---- */
-  var raf=0;
-  function tick(){
-    /* stop the moment we've navigated away — otherwise this keeps animating
-       a detached ring forever in the background */
-    if(currentRoute().name!=="library"){raf=0;return;}
-    if(libPrefs.autoScroll&&Date.now()-scroll.lastManual>1500){
-      scroll.progress+=scroll.autoDir*0.0016;
-      if(scroll.progress>=1){scroll.progress=1;scroll.autoDir=-1;}
-      else if(scroll.progress<=0){scroll.progress=0;scroll.autoDir=1;}
+  // arriving back from a recipe → morph the carousel stack back out to the ring.
+  // `hold` freezes the carousel layout while the DOM freeze-frame cross-fades out.
+  var resume=null;
+  try{
+    var mj=sessionStorage.getItem("recidex-morph");
+    if(mj){
+      var o=JSON.parse(mj);
+      resume={ selectedId:o.id, yaw:o.yaw||0, peers:peerIdsFor(o.id),
+               hold: document.getElementById("recidex-rv-freeze") ? HANDOFF_MS+140 : 0 };
+      sessionStorage.removeItem("recidex-morph");
     }
-    if(libPrefs.autoRotate)ringAngle+=LAYOUT.rotateSpeed;
-    var ep=easeInOutCubic(scroll.progress);
-    var list=cur.list,N=list.length;
-    /* the ring/cascade spacing follows zoom all the way down, but the card
-       itself keeps a legible floor so its three text rows never clip */
-    var CW=Math.max(132,LAYOUT.cardSize*libPrefs.zoom),CH=CW*LAYOUT.cardAspect;
-    list.forEach(function(r,i){
-      var cs=cardState[r.id],o=cardEls[r.id];if(!cs||!o)return;
-      var c1=cardPos(i,N,"cascade"),c2=cardPos(i,N,"ring");
-      var bx=lerp(c1.x,c2.x,ep),by=lerp(c1.y,c2.y,ep);
-      var push=pushOffset(bx,by);
-      var tx=bx+push.x,ty=by+push.y;
-      cs.x+=(tx-cs.x)*0.16;cs.y+=(ty-cs.y)*0.16;
-      o.style.width=CW+"px";o.style.height=CH+"px";
-      o.style.transform="translate3d("+(cs.x-CW/2)+"px,"+(cs.y-CH/2)+"px,0)";
+  }catch(e){}
+
+  var stage=el("div");stage.id="lib-stage";
+  if(resume)stage.className="lib-stage-morphing"; else stage.className="lib-stage-in";
+  root.appendChild(stage);
+  root.appendChild(el("div","lib-hint","Scroll to turn the ring · hover a card to preview"));
+
+  function openRecipe(id){
+    window.RecidexLibrary.exitToRecipe(id,peerIdsFor(id)).then(function(){
+      // grab the frozen frame + the card's screen rect the instant the morph lands
+      try{pendingSnap=window.RecidexLibrary.snapshot();}catch(e){pendingSnap=null;}
+      try{sessionStorage.setItem("recidex-morph",JSON.stringify({id:id,yaw:window.RecidexLibrary.getYaw()}));}catch(e){}
+      go("/recipe/"+encodeURIComponent(id));
     });
-    if(preview.classList.contains("show")&&ep<0.7)hidePreviewNow();
-    raf=requestAnimationFrame(tick);
   }
-  if(raf)cancelAnimationFrame(raf);
-  raf=requestAnimationFrame(tick);
+  function mountRing(){
+    if(!stage.isConnected)return;
+    window.RecidexLibrary.mount(stage,{
+      recipes:DB.recipes.slice(),
+      categories:CATEGORIES,
+      resume:resume,
+      onOpen:openRecipe
+    });
+    window.__recidexOpen=openRecipe;   // dev/test hook
+  }
 
-  /* ---- input: wheel assembles/disassembles the ring; cmd/ctrl+wheel zooms;
-     drag scrubs progress; arrows nudge it; mouse position drives the push field ---- */
-  stage.addEventListener("wheel",function(e){
-    if(e.target.closest(".filter-dock")||e.target.closest(".lib-controls"))return;
-    e.preventDefault();
-    if(e.ctrlKey||e.metaKey){setZoom(libPrefs.zoom-e.deltaY*0.0016);return;}
-    setProgress(scroll.progress+e.deltaY*0.0014);
-  },{passive:false});
-
-  stage.addEventListener("pointermove",function(e){
-    var r=stage.getBoundingClientRect();
-    mouse.x=e.clientX-r.left;mouse.y=e.clientY-r.top;mouse.active=true;
-  });
-  stage.addEventListener("pointerleave",function(){mouse.active=false;});
-
-  var drag=null;
-  stage.addEventListener("pointerdown",function(e){
-    if(e.target.closest(".filter-dock")||e.target.closest(".lib-controls")||e.target.closest(".idx-card")||e.target.closest(".ring-preview"))return;
-    drag={x:e.clientX,y:e.clientY};
-  });
-  window.addEventListener("pointermove",function(e){
-    if(!drag)return;
-    var dx=e.clientX-drag.x,dy=e.clientY-drag.y;
-    drag.x=e.clientX;drag.y=e.clientY;
-    setProgress(scroll.progress-dy*0.0028-dx*0.0006);
-  });
-  window.addEventListener("pointerup",function(){drag=null;});
-
-  window.addEventListener("keydown",function(e){
-    if(currentRoute().name!=="library")return;
-    if(e.key==="ArrowUp"||e.key==="ArrowRight")setProgress(scroll.progress+0.12);
-    else if(e.key==="ArrowDown"||e.key==="ArrowLeft")setProgress(scroll.progress-0.12);
-  });
-
-  var rz;window.addEventListener("resize",function(){
-    clearTimeout(rz);rz=setTimeout(function(){if(currentRoute().name==="library")updateCenter();},120);
-  });
-
-  paint();
+  if(window.RecidexLibrary&&window.RecidexLibrary.ready){
+    mountRing();
+  }else{
+    var boot=libLoading(true);root.appendChild(boot);
+    window.addEventListener("recidex-r3f-ready",function once(){
+      window.removeEventListener("recidex-r3f-ready",once);
+      if(currentRoute().name==="library"&&stage.isConnected){boot.remove();mountRing();}
+    });
+  }
 }
 
-/* ============================================================ RECIPE VIEW */
-var editingSteps=false;
-function viewRecipe(root,id){
-  var recipe=DB.recipes.find(function(r){return r.id===id;});
-  if(!recipe){go("/library");return;}
-  var idx=DB.recipes.indexOf(recipe);
+/* ============================================================ RECIPE (breadcrumb · label menu · flip carousel · detail) */
+function batchNo(recipe){
+  var s=recipe.id||"",n=0;
+  for(var i=0;i<s.length;i++)n=(n*31+s.charCodeAt(i))>>>0;
+  return String(n%900+100);
+}
+function dietLine(recipe){
+  var d=(recipe.tags||[]).filter(function(t){return /vegan|vegetarian|gluten|dairy|nut|keto|paleo|free/i.test(t);});
+  if(d.length)return d.join(" · ");
+  return (recipe.tags&&recipe.tags[0])||"";
+}
+function ingShort(line){
+  return String(line).replace(/^\s*((?:\d+\s+)?\d+(?:[\/.]\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞])\s*(?:[a-z]+\.?\s+)?(?:of\s+)?/i,"").trim();
+}
+function labelFace(recipe){
+  var w=el("div","lc");
+  var ink=el("div","lc-ink");
+  function hr(){return el("div","lc-hr");}
+
+  var r1=el("div","lc-row lc-r1");
+  r1.appendChild(el("div","lc-title",(recipe.title||"Untitled").toUpperCase()));
+  r1.appendChild(el("div","lc-vr"));
+  var batch=el("div","lc-batch");
+  batch.appendChild(el("div","lc-batch-k","BATCH NO."));
+  batch.appendChild(el("div","lc-batch-n",batchNo(recipe)));
+  r1.appendChild(batch);
+
+  var r2=el("div","lc-row lc-r2",((recipe.yield||"—")+"").toUpperCase());
+
+  var r3=el("div","lc-row lc-r3");
+  var c1=el("div","lc-cell");
+  c1.appendChild(el("span","lc-big",recipe.totalTime||"—"));
+  c1.appendChild(el("span","lc-sm","TOTAL TIME"));
+  r3.appendChild(c1);
+  r3.appendChild(el("div","lc-vr"));
+  r3.appendChild(el("div","lc-cell lc-diet",(dietLine(recipe)||"—").toUpperCase()));
+
+  var r4=el("div","lc-row lc-r4");
+  r4.appendChild(el("div","lc-sm","INGREDIENTS"));
+  r4.appendChild(el("div","lc-ings",(recipe.ingredients||[]).map(ingShort).filter(Boolean).join(", ")));
+
+  ink.appendChild(r1);ink.appendChild(hr());ink.appendChild(r2);ink.appendChild(hr());
+  ink.appendChild(r3);ink.appendChild(hr());ink.appendChild(r4);
+  w.appendChild(ink);
+  w.appendChild(el("div","lc-stamp","✦"));
+  return w;
+}
+function buildFlipCard(recipe){
+  var flip=el("div","rv-flip");
+  var inner=el("div","rv-flip-inner");
+  var front=el("div","rv-face front");
+  front.appendChild(labelFace(recipe));
+  var hint=el("div","rv-flip-hint");hint.title="Flip to the bracket graph";
+  front.appendChild(hint);
+  var back=el("div","rv-face back");
+  back.appendChild(renderGraph(recipe,{mini:true}));
+  inner.appendChild(front);inner.appendChild(back);
+  flip.appendChild(inner);
+  return flip;
+}
+function fitBackGraphs(cards){
+  cards.forEach(function(card){
+    var back=card.querySelector(".rv-face.back");
+    var wrap=card.querySelector(".rv-face.back .graph-wrap");
+    var g=card.querySelector(".rv-face.back .graph");
+    if(!back||!wrap||!g)return;
+    // clear prior fit so the graph reports its true intrinsic size
+    g.style.transform="none";wrap.style.width="";wrap.style.height="";
+    var gr=g.getBoundingClientRect();
+    var gw=gr.width,gh=gr.height;
+    var cw=back.clientWidth-24,ch=back.clientHeight-24;
+    if(!gw||!gh||!cw||!ch)return;
+    var s=Math.min(cw/gw,ch/gh)*0.94;
+    if(s>1)s=1;
+    g.style.transformOrigin="top left";
+    g.style.transform="scale("+s.toFixed(3)+")";
+    wrap.style.width=Math.round(gw*s)+"px";
+    wrap.style.height=Math.round(gh*s)+"px";
+  });
+}
+function fitBackGraphsSoon(cards){
+  requestAnimationFrame(function(){
+    requestAnimationFrame(function(){ fitBackGraphs(cards); });
+  });
+}
+
+function viewRecipe(root,id,snap){
   root.appendChild(topbar());
-
-  var rv=el("div","rv");
-  var ghost=el("div","rv-ghost");
-  ghost.innerHTML='<div class="blob b1"></div><div class="blob b2"></div>';
-  var word=el("div","word",(recipe.tags[0]||"recipe").toUpperCase());
-  ghost.appendChild(word);
-  rv.appendChild(ghost);
-
-  var grid=el("div","rv-grid");
-
-  /* left list */
-  var left=el("div","rv-list");
-  var back=el("button","pill ghost back","‹ Back");
-  back.onclick=function(){go("/library");};
-  left.appendChild(back);
-  var scroll=el("div","scroll");
-  DB.recipes.forEach(function(r){
-    var b=el("button","r-item"+(r.id===id?" on":""),r.title);
-    b.onclick=function(){editingSteps=false;go("/recipe/"+r.id);};
-    scroll.appendChild(b);
-  });
-  left.appendChild(scroll);
-  grid.appendChild(left);
-
-  /* center */
-  var main=el("div","rv-main");
-  var cardHost=el("div");cardHost.style.cssText="width:min(100%,600px);align-self:stretch";
-  cardHost.appendChild(renderCard(recipe,false));
-  main.appendChild(cardHost);
-  var crz;window.addEventListener("resize",function(){
-    if(currentRoute().name!=="recipe")return;
-    clearTimeout(crz);crz=setTimeout(function(){
-      var f=cardHost.querySelector(".flip");var gw=cardHost.querySelector(".flip-face.front .graph-wrap");
-      if(f&&gw)fitGraph(gw,(f.clientWidth||480)-32,null);
-    },140);
-  });
-  var hint=el("div","flip-hint","Click the card to flip · front graph / back label");
-  main.appendChild(hint);
-
-  var title=el("div","striped rv-title");title.textContent=recipe.title;
-  main.appendChild(title);
-  main.appendChild(el("div","rv-squiggle"));
-
-  var tags=el("div","rv-tags");
-  function paintTags(){
-    tags.innerHTML="";
-    recipe.tags.forEach(function(t){
-      var row=el("div","t");row.appendChild(el("span",null,t));
-      var x=el("button",null,"×");x.title="remove label";
-      x.onclick=function(){recipe.tags=recipe.tags.filter(function(y){return y!==t;});save();paintTags();};
-      row.appendChild(x);tags.appendChild(row);
-    });
-    var add=el("input","rv-tagadd");add.placeholder="+ add label";
-    add.onkeydown=function(e){
-      if(e.key==="Enter"&&add.value.trim()){
-        var v=add.value.trim().toLowerCase();
-        if(recipe.tags.indexOf(v)<0)recipe.tags.push(v);
-        save();paintTags();
-        var ni=tags.querySelector(".rv-tagadd");if(ni)ni.focus();
-      }
-    };
-    tags.appendChild(add);
+  var r=null;DB.recipes.forEach(function(x){if(x.id===id)r=x;});
+  if(!r){
+    var nf=el("div","gen");
+    var nh=el("h1");var ns=el("span","striped");ns.textContent="Recipe not found";nh.appendChild(ns);
+    nf.appendChild(nh);
+    var nr=el("div","gen-actions");
+    var nb=el("button","pill ghost","← Library");nb.onclick=function(){go("/library");};
+    nr.appendChild(nb);nf.appendChild(nr);
+    root.appendChild(nf);return;
   }
-  paintTags();
-  main.appendChild(tags);
 
+  var cat=r.category||CATEGORIES[0];
+  var peers=DB.recipes.filter(function(x){return (x.category||CATEGORIES[0])===cat;});
+  var cur=peers.indexOf(r);
+  if(cur<0)cur=0;
+
+  /* breadcrumb — Library › [Category], no recipe segment */
+  var crumb=el("div","rv-crumb");
+  var lib=el("a",null,"Library");lib.href="#/library";
+  crumb.appendChild(lib);
+  crumb.appendChild(el("span","sep","›"));
+  crumb.appendChild(el("span","here",cat));
+
+  var grid=el("div","rv");
+  // arriving via the freeze-frame handoff: the snapshot <img> covers the entrance,
+  // so the .rv container skips its own fade (the text column still cascades in)
+  if(snap)grid.style.animation="none";
+
+  /* left — label menu */
+  var labels=el("div","rv-labels");
+  peers.forEach(function(p,i){
+    var b=el("button","rv-label"+(i===cur?" active":""),p.title);
+    b.onclick=function(){setIndex(i);};
+    labels.appendChild(b);
+  });
+
+  /* center — carousel */
+  var stage=el("div","rv-stage");
+  var cards=peers.map(function(p,i){
+    var c=buildFlipCard(p);c.__i=i;
+    c.addEventListener("click",function(){
+      if(c.__i!==cur)setIndex(c.__i);
+      else { c.classList.toggle("flipped"); fitBackGraphsSoon([c]); }
+    });
+    stage.appendChild(c);
+    return c;
+  });
+
+  /* right — detail */
+  var detail=el("div","rv-detail");
+  var scroll=el("div","rv-scroll");
+  var tagRow=el("div","rv-tags");
   var actions=el("div","rv-actions");
-  var exp=el("button",null);exp.innerHTML=icon("export")+"<span>Export PNG</span>";
-  exp.onclick=function(){
-    var face=cardHost.querySelector(".flip").classList.contains("flipped")
-      ?cardHost.querySelector(".flip-face.back"):cardHost.querySelector(".flip-face.front");
-    exportCard(face,slug(recipe.title)+"-"+(cardHost.querySelector(".flip").classList.contains("flipped")?"label":"graph"));
-  };
-  var pr=el("button",null);pr.innerHTML=icon("print")+"<span>Print card</span>";
-  pr.onclick=function(){window.print();};
-  var dup=el("button",null);dup.innerHTML=icon("copy")+"<span>Duplicate</span>";
-  dup.onclick=function(){
-    var c=JSON.parse(JSON.stringify(recipe));c.id=uid();c.title=recipe.title+" (copy)";c.createdAt=Date.now();
-    DB.recipes.splice(idx+1,0,c);save();go("/recipe/"+c.id);
-  };
-  var del=el("button","danger");del.innerHTML=icon("trash")+"<span>Delete</span>";
-  del.onclick=function(){
-    if(!confirm("Delete “"+recipe.title+"”?"))return;
-    DB.recipes=DB.recipes.filter(function(r){return r.id!==id;});save();
-    go("/library");
-  };
-  actions.appendChild(exp);actions.appendChild(pr);actions.appendChild(dup);actions.appendChild(del);
-  main.appendChild(actions);
-  grid.appendChild(main);
+  detail.appendChild(scroll);detail.appendChild(tagRow);detail.appendChild(actions);
 
-  /* right instructions */
-  var right=el("div","rv-instructions");
-  var ih=el("div","ih");
-  ih.appendChild(el("h2",null,"Instructions"));
-  var editBtn=el("button");editBtn.innerHTML=icon("pencil");editBtn.title="edit steps";
-  ih.appendChild(editBtn);
-  right.appendChild(ih);
+  /* right-column entrance state (see the trigger block after the first paint) */
+  var colHidden=false,colStarted=false;
+  var reduceMotion=false;
+  try{reduceMotion=window.matchMedia&&window.matchMedia("(prefers-reduced-motion:reduce)").matches;}catch(e){}
+  function colEls(){return [].slice.call(scroll.children).concat([tagRow,actions]);}
 
-  var stepsBox=el("div","rv-steps");
-  function paintSteps(){
-    stepsBox.innerHTML="";
-    if(editingSteps){
-      var ta=el("textarea","rv-editsteps");
-      ta.value=recipe.steps.join("\n");
-      stepsBox.appendChild(ta);
-      var savebtn=el("button","pill red","Save steps");savebtn.style.marginTop=".8rem";
-      savebtn.onclick=function(){
-        recipe.steps=ta.value.split("\n").map(function(s){return s.trim();}).filter(Boolean);
-        save();editingSteps=false;
-        // re-render card + steps
-        cardHost.innerHTML="";cardHost.appendChild(renderCard(recipe,false));
-        paintSteps();
-        toast("Graph updated");
-      };
-      stepsBox.appendChild(savebtn);
-      var help=el("p");help.style.cssText="font-size:.62rem;color:var(--ink-30);margin-top:.6rem;text-transform:uppercase;letter-spacing:.08em";
-      help.textContent="One step per line. The graph regroups ingredients automatically.";
-      stepsBox.appendChild(help);
-      return;
+  function paintDetail(p){
+    scroll.innerHTML="";
+    scroll.appendChild(el("h1","rv-title",p.title));
+    if(p.description)scroll.appendChild(el("p","rv-desc",p.description));
+    scroll.appendChild(el("h3","rv-sec-h","Instructions"));
+    var stepsWrap=el("div","rv-steps");
+    (p.steps||[]).forEach(function(s,i){
+      var st=el("div","rv-step");
+      st.appendChild(el("div","rv-step-n","Step "+(i+1)));
+      st.appendChild(el("div","rv-step-b",s));
+      stepsWrap.appendChild(st);
+    });
+    scroll.appendChild(stepsWrap);
+    scroll.appendChild(el("h3","rv-sec-h","Notes"));
+    var hasNotes=p.notes&&p.notes.trim();
+    scroll.appendChild(el("p","rv-notes"+(hasNotes?"":" empty"),hasNotes?p.notes:"No notes yet — add them from Edit."));
+    scroll.scrollTop=0;
+
+    tagRow.innerHTML="";
+    (p.tags||[]).forEach(function(t){tagRow.appendChild(el("span","rv-tag",t));});
+
+    actions.innerHTML="";
+    function act(label,glyph,fn){
+      var a=el("button","rv-action");
+      a.appendChild(el("span","rv-action-t",label));
+      a.appendChild(el("span","rv-action-g",glyph));
+      a.onclick=fn;actions.appendChild(a);
     }
-    recipe.steps.forEach(function(s,i){
-      var d=el("div","rv-step");
-      d.appendChild(el("div","sn","Step "+(i+1)));
-      d.appendChild(el("p",null,s));
-      stepsBox.appendChild(d);
+    act("Edit","✎",function(){go("/edit/"+encodeURIComponent(p.id));});
+
+    // Export → a small PDF / JPEG menu popped above the action
+    var exp=el("button","rv-action rv-export");
+    exp.appendChild(el("span","rv-action-t","Export"));
+    exp.appendChild(el("span","rv-action-g","↑"));
+    var expMenu=null;
+    function closeExp(){ if(expMenu){expMenu.remove();expMenu=null;document.removeEventListener("click",expDoc,true);} }
+    function expDoc(ev){ if(!exp.contains(ev.target))closeExp(); }
+    exp.onclick=function(ev){
+      ev.stopPropagation();
+      if(expMenu){closeExp();return;}
+      expMenu=el("div","rv-export-menu");
+      ["PDF","JPEG"].forEach(function(f){
+        var b=el("button",null,f);
+        b.onclick=function(e){e.stopPropagation();closeExp();doExport(p,f.toLowerCase());};
+        expMenu.appendChild(b);
+      });
+      exp.appendChild(expMenu);
+      setTimeout(function(){document.addEventListener("click",expDoc,true);},0);
+    };
+    actions.appendChild(exp);
+
+    act("Duplicate","⧉",function(){
+      var copy=JSON.parse(JSON.stringify(p));
+      copy.id=uid();copy.title=p.title+" (copy)";copy.createdAt=Date.now();
+      DB.recipes.push(copy);save();
+      go("/recipe/"+encodeURIComponent(copy.id));
+    });
+
+    // if a carousel step repaints before the entrance has fired, keep the fresh
+    // elements hidden so they join the cascade rather than flashing in
+    if(colHidden&&!colStarted&&!reduceMotion)colEls().forEach(function(e){e.style.opacity="0";});
+
+    if(typeof syncMasks==="function")syncMasks();
+  }
+
+  function layoutCards(){
+    cards.forEach(function(c){
+      var d=c.__i-cur,ad=Math.abs(d);
+      if(ad>2){c.style.opacity="0";c.style.visibility="hidden";c.style.pointerEvents="none";return;}
+      c.style.visibility="visible";
+      var y=d*58;
+      var scale=d===0?1:ad===1?0.8:0.64;
+      var blur=d===0?0:ad===1?6:12;
+      var op=d===0?1:ad===1?0.3:0.16;
+      c.style.transform="translate(-50%,-50%) translateY("+y+"%) scale("+scale+")";
+      c.style.filter=blur?"blur("+blur+"px)":"none";
+      c.style.opacity=String(op);
+      c.style.zIndex=String(10-ad);
+      c.style.pointerEvents=ad<=1?"auto":"none";
     });
   }
-  editBtn.onclick=function(){editingSteps=!editingSteps;paintSteps();};
-  paintSteps();
-  right.appendChild(stepsBox);
-  grid.appendChild(right);
 
-  rv.appendChild(grid);
+  function setIndex(i){
+    i=Math.max(0,Math.min(peers.length-1,i));
+    if(i===cur)return;
+    cur=i;r=peers[i];
+    Array.prototype.forEach.call(labels.children,function(n,k){n.classList.toggle("active",k===cur);});
+    var active=labels.children[cur];
+    if(active&&active.scrollIntoView)active.scrollIntoView({block:"nearest",behavior:"smooth"});
+    cards.forEach(function(c){c.classList.remove("flipped");});
+    layoutCards();
+    paintDetail(r);
+    history.replaceState(null,"","#/recipe/"+encodeURIComponent(r.id));
+  }
 
-  var nav=el("div","rv-nav");
-  var prev=el("button","pill ghost","‹ Previous");
-  prev.onclick=function(){editingSteps=false;go("/recipe/"+DB.recipes[(idx-1+DB.recipes.length)%DB.recipes.length].id);};
-  var next=el("button","pill ghost","Next ›");
-  next.onclick=function(){editingSteps=false;go("/recipe/"+DB.recipes[(idx+1)%DB.recipes.length].id);};
-  nav.appendChild(prev);nav.appendChild(next);
-  rv.appendChild(nav);
+  /* wheel over labels or carousel steps the shared index */
+  var acc=0,lock=false;
+  function onWheel(e){
+    e.preventDefault();
+    if(lock)return;
+    acc+=e.deltaY;
+    if(Math.abs(acc)>56){
+      setIndex(cur+(acc>0?1:-1));
+      acc=0;lock=true;
+      setTimeout(function(){lock=false;},420);
+    }
+  }
+  labels.addEventListener("wheel",onWheel,{passive:false});
+  stage.addEventListener("wheel",onWheel,{passive:false});
 
-  root.appendChild(rv);
-  document.querySelector(".rv-steps").scrollTop=0;
+  grid.appendChild(labels);grid.appendChild(stage);grid.appendChild(detail);
+  root.appendChild(crumb);root.appendChild(grid);
+
+  function syncMasks(){
+    labels.classList.toggle("masked",labels.clientHeight>0&&labels.scrollHeight-labels.clientHeight>4);
+    scroll.classList.toggle("masked",scroll.clientHeight>0&&scroll.scrollHeight-scroll.clientHeight>4);
+  }
+
+  layoutCards();
+  paintDetail(r);
+
+  /* ── freeze-frame handoff ──────────────────────────────────────────────
+     `#recidex-snap` (the last WebGL frame, created in render()) is sitting on
+     top. Nudge the carousel so the real forefront card starts exactly where the
+     snapshot's card is, then ease it home while the snapshot cross-fades out —
+     canvas → DOM is a dissolve of two identical cards, not a cut. */
+  if(snap){
+    var si=document.getElementById("recidex-snap");
+    if(snap.rect&&cards[cur]){
+      var nat=cards[cur].getBoundingClientRect();
+      var sb=stage.getBoundingClientRect();
+      var ncx=nat.x+nat.width/2, ncy=nat.y+nat.height/2;
+      var dx=(snap.rect.x+snap.rect.w/2)-ncx, dy=(snap.rect.y+snap.rect.h/2)-ncy;
+      var sc=nat.width?snap.rect.w/nat.width:1;
+      if(nat.width&&(Math.abs(dx)>6||Math.abs(dy)>6||Math.abs(sc-1)>0.04)){
+        stage.style.transformOrigin=(ncx-sb.x)+"px "+(ncy-sb.y)+"px";
+        stage.style.transform="translate("+dx+"px,"+dy+"px) scale("+sc.toFixed(3)+")";
+        requestAnimationFrame(function(){
+          stage.style.transition="transform "+(HANDOFF_MS+90)+"ms var(--ease-liminal)";
+          stage.style.transform="none";
+          setTimeout(function(){stage.style.transition="";stage.style.transformOrigin="";},HANDOFF_MS+180);
+        });
+      }
+    }
+    if(si)dissolveOut(si,55,HANDOFF_MS);
+  }
+
+  /* ── right-column entrance ──────────────────────────────────────────────
+     The card is handled by the ring→recipe handoff; the left label list is
+     chrome. The text column (title · description · Instructions · tags+actions)
+     slides+fades up in a light cascade, but only once the card has *finished
+     arriving* — keyed off the ring canvas being gone, not a fixed timeout, so
+     it stays in sync if the transition timing changes. */
+  function runColumnEntrance(){
+    if(colStarted)return;colStarted=true;
+    if(reduceMotion){colEls().forEach(function(e){e.style.removeProperty("opacity");});return;}
+    var kids=[].slice.call(scroll.children);
+    var isT=function(e){return e.classList.contains("rv-title");};
+    var isD=function(e){return e.classList.contains("rv-desc");};
+    var groups=[
+      [kids.filter(isT),0],
+      [kids.filter(isD),1],
+      [kids.filter(function(e){return !isT(e)&&!isD(e);}),2],   // Instructions + Notes block
+      [[tagRow,actions],3]
+    ];
+    groups.forEach(function(g){
+      g[0].forEach(function(e){
+        if(!e)return;
+        e.style.removeProperty("opacity");
+        e.style.animation="rvColIn 380ms var(--ease-liminal) "+(g[1]*72)+"ms both";
+      });
+    });
+  }
+  if(!reduceMotion){
+    colHidden=true;colEls().forEach(function(e){e.style.opacity="0";});
+    var viaMorph=false;try{viaMorph=!!sessionStorage.getItem("recidex-morph");}catch(e){}
+    if(viaMorph||snap){
+      // "card finished arriving" = both the ring canvas and the freeze-frame img are gone
+      var t0=Date.now();
+      var iv=setInterval(function(){
+        var busy=document.getElementById("lib-stage")||document.getElementById("recidex-snap");
+        if(!busy||Date.now()-t0>1600){
+          clearInterval(iv);setTimeout(runColumnEntrance,175);
+        }
+      },40);
+    }else{
+      requestAnimationFrame(function(){requestAnimationFrame(function(){setTimeout(runColumnEntrance,70);});});
+    }
+  }
+
+  fitBackGraphsSoon(cards);syncMasks();
+  setTimeout(function(){fitBackGraphs(cards);syncMasks();},450);
+  if(document.fonts&&document.fonts.ready)document.fonts.ready.then(function(){fitBackGraphs(cards);syncMasks();});
+  window.addEventListener("resize",function onResize(){
+    if(!grid.isConnected){window.removeEventListener("resize",onResize);return;}
+    fitBackGraphs(cards);syncMasks();
+  });
 }
 
 /* ============================================================ GENERATOR */
-function viewNew(root){
+function viewNew(root,editId){
+  try{sessionStorage.removeItem("recidex-morph");}catch(e){}
   root.appendChild(topbar());
+  var edit=null;
+  if(editId)DB.recipes.forEach(function(x){if(x.id===editId)edit=x;});
   var gen=el("div","gen");
-  var h=el("h1");var st=el("span","striped");st.textContent="New Recipe";h.appendChild(st);
+  var h=el("h1");var st=el("span","striped");st.textContent=edit?"Edit Recipe":"New Recipe";h.appendChild(st);
   gen.appendChild(h);
-  var lede=el("p","lede","Paste a recipe below. The generator structures the ingredients and steps into a Cooking-for-Engineers style graph — each process step brackets the ingredients it combines and flows into the next.");
+  var lede=el("p","lede",edit
+    ? "Adjust any field and save. The graph rebuilds from the ingredients and steps; description and notes travel with the recipe but stay off the graph."
+    : "Paste a recipe below. The generator structures the ingredients and steps into a Cooking-for-Engineers style graph — each process step brackets the ingredients it combines and flows into the next.");
   gen.appendChild(lede);
 
   var form=el("div","gen-grid");
@@ -1325,18 +1248,32 @@ function viewNew(root){
   var fYield=el("input");fYield.placeholder="Makes 16 squares";
   var fTime=el("input");fTime.placeholder="50 min";
   var fTags=el("input");fTags.placeholder="dessert, chocolate, weekend";
+  var fCat=el("select");fCat.required=true;
+  CATEGORIES.forEach(function(c){var o=el("option",null,CAT_LABEL[c]||c);o.value=c;fCat.appendChild(o);});
+  var fDesc=el("textarea");fDesc.placeholder="One or two lines — what this recipe is and why.";fDesc.style.minHeight="5rem";
   var fIng=el("textarea");fIng.placeholder="4 oz unsalted butter\n1 cup sugar\n1/4 tsp vanilla extract\n2 large eggs\n1/2 cup all-purpose flour\n1/3 cup cocoa powder";
   var fSteps=el("textarea");fSteps.placeholder="Preheat oven to 350°F\nMelt the butter\nMix in the sugar and vanilla\nMix in the eggs\nWhisk the flour and cocoa in a separate bowl\nFold the dry into the wet\nBake at 350°F for 30 to 40 minutes";
+  var fNotes=el("textarea");fNotes.placeholder="Freeform — substitutions, timing, what went wrong last time. Not step-numbered.";fNotes.style.minHeight="6rem";
 
   form.appendChild(field("Title","",fTitle));
   form.appendChild(field("Source URL","optional",fUrl));
   form.appendChild(field("Yield","",fYield));
   form.appendChild(field("Total time","",fTime));
   form.appendChild(field("Labels","comma separated",fTags));
-  var sp=el("div","field");form.appendChild(sp);
+  form.appendChild(field("Category",edit?"required · reassign here":"required · ring segment",fCat));
+  form.appendChild(field("Description","shown on the recipe view",fDesc));
   form.appendChild(field("Ingredients","one per line, with quantities",fIng));
   form.appendChild(field("Steps","one step per line",fSteps));
+  form.appendChild(field("Notes","freeform, not step-numbered",fNotes));
   gen.appendChild(form);
+
+  if(edit){
+    fTitle.value=edit.title||"";fUrl.value=edit.sourceUrl||"";fYield.value=edit.yield||"";
+    fTime.value=edit.totalTime||"";fTags.value=(edit.tags||[]).join(", ");
+    fCat.value=edit.category||CATEGORIES[0];fDesc.value=edit.description||"";
+    fIng.value=(edit.ingredients||[]).join("\n");fSteps.value=(edit.steps||[]).join("\n");
+    fNotes.value=edit.notes||"";
+  }
 
   var preview=el("div","gen-preview");
   preview.appendChild(el("div","u-label","Live graph preview"));
@@ -1347,6 +1284,9 @@ function viewNew(root){
     return {
       id:"draft",title:fTitle.value.trim()||"Untitled recipe",sourceUrl:fUrl.value.trim(),
       yield:fYield.value.trim(),totalTime:fTime.value.trim(),activeTime:"",
+      category:fCat.value||CATEGORIES[0],
+      description:fDesc.value.trim(),
+      notes:fNotes.value.trim(),
       tags:fTags.value.split(",").map(function(s){return s.trim().toLowerCase();}).filter(Boolean),
       ingredients:fIng.value.split("\n").map(function(s){return s.trim();}).filter(Boolean),
       steps:fSteps.value.split("\n").map(function(s){return s.trim();}).filter(Boolean)
@@ -1368,41 +1308,774 @@ function viewNew(root){
   paintPreview();
 
   var act=el("div","gen-actions");
-  var gen1=el("button","pill red","Generate graph →");
+  var gen1=el("button","pill red",edit?"Save changes":"Generate graph →");
   gen1.onclick=function(){
     var d=draft();
     if(!d.ingredients.length||!d.steps.length){toast("Need ingredients and steps");return;}
+    if(edit){
+      delete d.id;
+      Object.assign(edit,d);save();
+      go("/recipe/"+encodeURIComponent(edit.id));
+      return;
+    }
     d.id=uid();d.createdAt=Date.now();
     DB.recipes.push(d);save();
-    go("/recipe/"+d.id);
+    try{sessionStorage.setItem("recidex-generating",d.id);}catch(e){}
+    go("/library");
   };
-  var samp=el("button","pill ghost","Fill sample");
-  samp.onclick=function(){
-    fTitle.value="Espresso Brownies";fYield.value="Makes 16 squares";fTime.value="50 min";
-    fTags.value="dessert, chocolate, weekend";
-    fIng.value="4 oz unsalted butter\n1 cup sugar\n1/4 tsp vanilla extract\n1 shot fresh brewed espresso\n2 large eggs\n1/2 cup all-purpose flour\n1/3 cup cocoa powder\n1/4 tsp baking soda\n1/4 tsp table salt";
-    fSteps.value="Butter and flour an 8x8-in pan\nPreheat oven to 350°F (170°C)\nMelt the butter\nMix in the sugar, vanilla, and espresso\nMix in the eggs\nWhisk together the flour, cocoa powder, baking soda, and salt in a separate bowl\nFold the dry ingredients into the wet\nBake at 350°F for 30 to 40 minutes";
-    paintPreview();
-  };
+  act.appendChild(gen1);
+  if(!edit){
+    var samp=el("button","pill ghost","Fill sample");
+    samp.onclick=function(){
+      fTitle.value="Espresso Brownies";fYield.value="Makes 16 squares";fTime.value="50 min";
+      fTags.value="dessert, chocolate, weekend";fCat.value="Dessert";
+      fDesc.value="Fudgy espresso brownies — the coffee sharpens the chocolate without ever reading as coffee.";
+      fIng.value="4 oz unsalted butter\n1 cup sugar\n1/4 tsp vanilla extract\n1 shot fresh brewed espresso\n2 large eggs\n1/2 cup all-purpose flour\n1/3 cup cocoa powder\n1/4 tsp baking soda\n1/4 tsp table salt";
+      fSteps.value="Butter and flour an 8x8-in pan\nPreheat oven to 350°F (170°C)\nMelt the butter\nMix in the sugar, vanilla, and espresso\nMix in the eggs\nWhisk together the flour, cocoa powder, baking soda, and salt in a separate bowl\nFold the dry ingredients into the wet\nBake at 350°F for 30 to 40 minutes";
+      paintPreview();
+    };
+    act.appendChild(samp);
+  }
   var cancel=el("button","pill ghost","Cancel");
-  cancel.onclick=function(){go("/library");};
-  act.appendChild(gen1);act.appendChild(samp);act.appendChild(cancel);
+  cancel.onclick=function(){go(edit?"/recipe/"+encodeURIComponent(edit.id):"/library");};
+  act.appendChild(cancel);
   gen.appendChild(act);
+
+  if(edit){
+    var danger=el("div","gen-danger");
+    var delBtn=el("button","btn-del","Delete recipe");
+    danger.appendChild(delBtn);
+    delBtn.onclick=function(){
+      danger.innerHTML="";
+      var q=el("span","del-q");
+      q.textContent="Delete “"+(edit.title||"this recipe")+"”? This can’t be undone.";
+      var no=el("button","pill ghost","Cancel");
+      no.onclick=function(){ danger.innerHTML=""; danger.appendChild(delBtn); };
+      var yes=el("button","btn-del solid","Delete");
+      yes.onclick=function(){
+        var i=DB.recipes.indexOf(edit);
+        if(i>=0)DB.recipes.splice(i,1);
+        save();
+        toast("Deleted “"+(edit.title||"recipe")+"”");
+        go("/library");
+      };
+      danger.appendChild(q);danger.appendChild(no);danger.appendChild(yes);
+      no.focus();   // safe default — Enter cancels, not deletes
+    };
+    gen.appendChild(danger);
+  }
 
   root.appendChild(gen);
 }
 
 /* ============================================================ render */
+function teardownStage(stage){
+  if(window.RecidexLibrary&&window.RecidexLibrary.unmount)window.RecidexLibrary.unmount();
+  if(stage&&stage.parentNode)stage.parentNode.removeChild(stage);
+}
+function dissolveOut(node,delay,dur,after){
+  requestAnimationFrame(function(){
+    node.style.transition="opacity "+dur+"ms var(--ease-liminal)";
+    setTimeout(function(){node.style.opacity="0";},delay);
+    setTimeout(function(){ if(node.parentNode)node.parentNode.removeChild(node); if(after)after(); },delay+dur+40);
+  });
+}
 function render(){
   var root=document.getElementById("app");
-  root.innerHTML="";
   var r=currentRoute();
-  if(r.name==="library")viewLibrary(root);
-  else if(r.name==="new")viewNew(root);
-  else if(r.name==="recipe")viewRecipe(root,r.id);
+  var prev=prevRouteName; prevRouteName=r.name;
+  var stage=document.getElementById("lib-stage");
+
+  /* ── forward handoff: float the frozen WebGL frame over the incoming recipe view ── */
+  var fwd=(r.name==="recipe"&&pendingSnap&&pendingSnap.url);
+  var snap=pendingSnap; pendingSnap=null;
+  if(fwd){
+    var img=document.createElement("img");
+    img.id="recidex-snap";img.src=snap.url;
+    img.style.cssText="position:fixed;inset:0;width:100vw;height:100vh;object-fit:fill;z-index:58;pointer-events:none";
+    document.body.appendChild(img);
+    teardownStage(stage);   // canvas has done its job — the snapshot carries its pixels
+    stage=null;
+  }
+
+  /* ── reverse handoff: float a frozen copy of the recipe view over the ring ── */
+  if(r.name==="library"&&prev==="recipe"&&!fwd){
+    var hasMorph=false;try{hasMorph=!!sessionStorage.getItem("recidex-morph");}catch(e){}
+    var rv=root.querySelector(".rv"),rc=root.querySelector(".rv-crumb");
+    if(hasMorph&&(rv||rc)){
+      var frz=el("div");frz.id="recidex-rv-freeze";
+      frz.style.cssText="position:fixed;inset:0;z-index:6;pointer-events:none;overflow:hidden;"+
+        "background:radial-gradient(120% 80% at 18% 4%,#5A4E45 0%,#3A312C 34%,#251F1C 68%,#1E1917 100%)";
+      if(rc)frz.appendChild(rc);
+      if(rv)frz.appendChild(rv);
+      document.body.appendChild(frz);
+      dissolveOut(frz,HANDOFF_MS/3,HANDOFF_MS);
+    }
+  }
+
+  /* ── other transitions (→ /new etc.): plain canvas fade ── */
+  if(stage&&r.name!=="library"){
+    document.body.appendChild(stage);
+    stage.className="lib-stage-out";
+    setTimeout(function(){teardownStage(stage);},360);
+  }else if(stage&&r.name==="library"){
+    teardownStage(stage);
+  }
+
+  root.innerHTML="";
+  if(r.name==="new")viewNew(root,r.editId);
+  else if(r.name==="recipe")viewRecipe(root,r.id,fwd?snap:null);
+  else viewLibrary(root);
   window.scrollTo(0,0);
 }
 })();
+</script>
+
+<!-- ══════════════════ LIBRARY RING · React Three Fiber island ══════════════════
+     Scoped framework exception (CLAUDE.md). No JSX / no build: the tree is built
+     with React.createElement. Exposes window.RecidexLibrary = { mount, unmount }. -->
+<script type="module" async>
+import React from "react";
+import { createRoot } from "react-dom/client";
+import * as THREE from "three";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+
+const h = React.createElement;
+const { useRef, useState, useMemo, useEffect, Fragment } = React;
+
+const R = 5.8;                       // ring radius
+const CARD_W = 2.0, CARD_H = 1.5;    // card plane size — 4:3, matches the recipe-view flip card
+const FAN = 0.34;                    // angular spread between cards in one segment
+const WHEEL_K = 0.0016;              // wheel deltaY → radians
+const SEGMENTS = 5;
+const SEG = (Math.PI * 2) / SEGMENTS;
+
+/* camera framing — elevated + oblique so the whole ring reads as a full ellipse
+   (near AND far arcs in frame at once), like the pmnd.rs homepage ring gallery. */
+const CAM_BASE = new THREE.Vector3(0, 7.6, 16.4);
+const CAM_TARGET = new THREE.Vector3(0, -1.6, 0);
+const CAM_FOV = 40;
+const PARALLAX_AZ = 0.13;            // cursor x → camera azimuth swing (radians)
+const PARALLAX_EL = 2.0;             // cursor y → camera elevation swing (units)
+const Y_AXIS = new THREE.Vector3(0, 1, 0);
+const PAPER_BACK = "#E1DBCF";        // blank reverse of a card, seen on the ring's far arc
+
+/* ring → recipe morph — the cards themselves travel from their ring slots to the
+   recipe view's vertical carousel stack (and back), one continuous motion. */
+const CAM_RECIPE = new THREE.Vector3(-0.5, 0.4, 9.8);   // straight-on carousel framing
+const CAM_RECIPE_TGT = new THREE.Vector3(-0.5, 0.4, 0);
+const CAROUSEL_ORIGIN = new THREE.Vector3(-1.08, 0.2, 3.1); // forefront card, aligned to .rv-stage centre
+const MORPH_MS = 720;
+
+const anim = {
+  phase: "ring",     // "ring" | "toRecipe" | "toRing"
+  p: 0,              // 0 = ring layout, 1 = carousel layout (eased)
+  raw: 0,
+  start: 0,          // performance.now() when the current morph began (may be in the future → hold)
+  selectedId: null,
+  peers: [],         // recipe ids in the selected category, carousel order
+  yaw: 0             // live ring rotation, saved across the route change
+};
+
+// live GL handle for the freeze-frame handoff (see RecidexLibrary.snapshot)
+let sceneCamera = null, sceneGL = null;
+function easeInOut(t){ return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2; }
+function lerpAngle(a, b, t){
+  let d = (b - a) % (Math.PI * 2);
+  if (d > Math.PI) d -= Math.PI * 2; else if (d < -Math.PI) d += Math.PI * 2;
+  return a + d * t;
+}
+// where card `id` sits in the carousel stack (world space), or null if it is not
+// a peer of the selected recipe
+function carouselSlot(id){
+  const idx = anim.peers.indexOf(id);
+  if (idx < 0) return null;
+  const d = idx - anim.peers.indexOf(anim.selectedId);
+  const ad = Math.abs(d);
+  const pos = new THREE.Vector3(
+    CAROUSEL_ORIGIN.x,
+    CAROUSEL_ORIGIN.y - d * 1.55,
+    CAROUSEL_ORIGIN.z - Math.min(ad, 3) * 1.35
+  );
+  return {
+    pos,
+    // tuned so the selected card projects onto the DOM .rv-flip forefront rect
+    scale: (d === 0 ? 1.05 : (ad === 1 ? 0.8 : 0.62) * 1.4),
+    opacity: ad > 2 ? 0 : d === 0 ? 1 : ad === 1 ? 0.5 : 0.28
+  };
+}
+const _ringW = new THREE.Vector3();
+const _cW = new THREE.Vector3();
+const _blend = new THREE.Vector3();
+const _recede = new THREE.Vector3(0, 0, -7);
+
+/* the hover preview is a *duplicate* of the hovered card, fixed at this point in
+   the ring's open middle — the original never leaves its slot */
+const PREVIEW_POS = new THREE.Vector3(0, 1.9, 4.6);
+const _wp = new THREE.Vector3();
+
+/* display names for the ring's category labels (one per segment, always shown) */
+const CAT_LABEL = {
+  "Appetizers": "Appetizer", "Entrees": "Entree", "Dessert": "Dessert",
+  "Drinks": "Drink", "Sauce & Seasoning": "Seasoning"
+};
+
+/* ---------- card face → CanvasTexture ----------
+   A pixel port of the recipe view's flip-card front (`labelFace` in the vanilla
+   shell): chocolate-bar label — title + red BATCH NO., yield, TOTAL TIME / diet,
+   INGREDIENTS, ✦ stamp, --paper-edge rules, dog-ear. The ring card and the
+   carousel card must be visually identical for the freeze-frame handoff. */
+const texCache = new Map();
+const PAPER = "#F0EDE4", INK = "#141110", INK_SOFT = "#4A423C", EDGE = "#C9C3B7", RED = "#C43D2E";
+const DISP = "'Chathura','Trebuchet MS',sans-serif";
+const MONO = "'JetBrains Mono',ui-monospace,monospace";
+
+// vanilla-shell label helpers, replicated so the texture matches labelFace 1:1
+function batchNo(recipe){
+  let s = recipe.id || "", n = 0;
+  for (let i = 0; i < s.length; i++) n = (n * 31 + s.charCodeAt(i)) >>> 0;
+  return String(n % 900 + 100);
+}
+function dietLine(recipe){
+  const d = (recipe.tags || []).filter((t) => /vegan|vegetarian|gluten|dairy|nut|keto|paleo|free/i.test(t));
+  return d.length ? d.join(" · ") : ((recipe.tags && recipe.tags[0]) || "");
+}
+function ingShort(line){
+  return String(line).replace(/^\s*((?:\d+\s+)?\d+(?:[\/.]\d+)?|[¼½¾⅓⅔⅛⅜⅝⅞])\s*(?:[a-z]+\.?\s+)?(?:of\s+)?/i, "").trim();
+}
+
+function cardTexture(recipe, big){
+  const key = recipe.id + (big ? "_b" : "") + "_" + (recipe.title || "");
+  if (texCache.has(key)) return texCache.get(key);
+
+  const S = big ? 4 : 3;                 // device px per CSS px (card is 400×300 CSS)
+  const W = 400 * S, H = 300 * S;
+  const cv = document.createElement("canvas");
+  cv.width = W; cv.height = H;
+  const c = cv.getContext("2d");
+  c.fillStyle = PAPER; c.fillRect(0, 0, W, H);
+
+  const px = 20 * S, py = 18 * S;
+  const x0 = px, x1 = W - px, cw = x1 - x0;
+  c.textBaseline = "alphabetic"; c.textAlign = "left";
+
+  function set(sizeCss, family, color, trackEm, weight){
+    const size = sizeCss * S;
+    c.font = `${weight || 400} ${size}px ${family}`;
+    c.letterSpacing = ((trackEm || 0) * size) + "px";
+    c.fillStyle = color;
+    return size;
+  }
+  function draw(str, x, y, align){ c.textAlign = align || "left"; c.fillText(str, x, y); c.textAlign = "left"; }
+  function rule(y){
+    c.strokeStyle = EDGE; c.lineWidth = Math.max(1, S * 0.9);
+    c.beginPath();
+    for (let i = 0; i <= 8; i++){
+      const xx = x0 + cw * i / 8, yy = y + Math.sin(i * 1.9 + y * 0.02) * 0.5 * S;
+      i ? c.lineTo(xx, yy) : c.moveTo(xx, yy);
+    }
+    c.stroke();
+  }
+  function vrule(x, yT, yB){
+    c.strokeStyle = EDGE; c.lineWidth = Math.max(1, S * 0.9);
+    c.beginPath(); c.moveTo(x, yT); c.lineTo(x, yB); c.stroke();
+  }
+  function wrapDisp(str, sizeCss, trackEm, maxW){
+    set(sizeCss, DISP, INK, trackEm);
+    const words = str.split(/\s+/), lines = [];
+    let curL = "";
+    for (const w of words){
+      const t = curL ? curL + " " + w : w;
+      if (c.measureText(t).width > maxW && curL){ lines.push(curL); curL = w; } else curL = t;
+    }
+    if (curL) lines.push(curL);
+    return lines;
+  }
+
+  /* row 1 — title | divider | BATCH NO. + number */
+  const titleLines = wrapDisp((recipe.title || "Untitled").toUpperCase(), 26, 0.11, cw * 0.64);
+  const tStep = 26 * S * 0.6;
+  let ty = py + 26 * S * 0.6;
+  set(26, DISP, INK, 0.11);
+  titleLines.forEach((ln) => { draw(ln, x0, ty); ty += tStep; });
+  const titleBottom = ty - tStep + 26 * S * 0.16;
+
+  let by = py + 8 * S;
+  set(8, MONO, INK, 0.2); draw("BATCH NO.", x1, by, "right");
+  by += 30 * S * 0.5 + 4 * S;
+  set(30, DISP, RED, 0); draw(batchNo(recipe), x1, by, "right");
+  const r1Bottom = Math.max(titleBottom, by + 3 * S);
+  vrule(x1 - cw * 0.30, py, r1Bottom);
+
+  let y = r1Bottom + 8 * S;
+  rule(y); y += 14 * S;
+
+  /* row 2 — yield */
+  set(10, MONO, INK, 0.22);
+  draw(String(recipe.yield || "—").toUpperCase(), x0, y + 10 * S);
+  y += 10 * S + 9 * S;
+  rule(y); y += 14 * S;
+
+  /* row 3 — total time (+ label) | divider | diet, right */
+  const r3Top = y;
+  set(20, DISP, INK, 0); draw(recipe.totalTime || "—", x0, y + 20 * S * 0.78);
+  set(8, MONO, INK_SOFT, 0.2); draw("TOTAL TIME", x0, y + 20 * S * 0.78 + 12 * S);
+  set(9, MONO, INK, 0.13); draw((dietLine(recipe) || "—").toUpperCase(), x1, y + 13 * S, "right");
+  const r3Bottom = y + 20 * S * 0.78 + 12 * S + 5 * S;
+  vrule(x0 + cw * 0.46, r3Top, r3Bottom);
+  y = r3Bottom + 8 * S;
+  rule(y); y += 15 * S;
+
+  /* row 4 — INGREDIENTS + list (3-line clamp, quantities stripped) */
+  set(8, MONO, INK_SOFT, 0.2); draw("INGREDIENTS", x0, y + 8 * S);
+  y += 8 * S + 11 * S;
+  const iSize = set(9.5, MONO, INK_SOFT, 0, 300);
+  const ing = (recipe.ingredients || []).map(ingShort).filter(Boolean).join(", ");
+  const iMax = cw - 22 * S, iStep = iSize * 1.5, iWords = ing.split(" ");
+  let line = "", ln = 0;
+  for (let k = 0; k < iWords.length && ln < 3; k++){
+    const t = line ? line + " " + iWords[k] : iWords[k];
+    if (c.measureText(t).width > iMax && line){ c.fillText(line, x0, y + iSize); y += iStep; line = iWords[k]; ln++; }
+    else line = t;
+  }
+  if (line && ln < 3) c.fillText(line, x0, y + iSize);
+
+  /* ✦ stamp — ringed circle, bottom-right */
+  c.letterSpacing = "0px";
+  const sr = 15 * S, scx = x1 - sr, scy = H - py - sr;
+  c.strokeStyle = EDGE; c.lineWidth = Math.max(1, S * 0.9);
+  c.beginPath(); c.arc(scx, scy, sr, 0, Math.PI * 2); c.stroke();
+  c.fillStyle = INK; c.textAlign = "center"; c.textBaseline = "middle";
+  c.font = `${13 * S}px ${MONO}`; c.fillText("✦", scx, scy + S);
+  c.textAlign = "left"; c.textBaseline = "alphabetic";
+
+  /* dog-ear (flip hint) */
+  const de = 30 * S;
+  const grad = c.createLinearGradient(W - de, H - de, W, H);
+  grad.addColorStop(0, "rgba(201,195,183,0)");
+  grad.addColorStop(0.46, EDGE);
+  grad.addColorStop(0.52, "#E4DFD4");
+  c.fillStyle = grad;
+  c.beginPath(); c.moveTo(W, H - de); c.lineTo(W - de, H); c.lineTo(W, H); c.closePath(); c.fill();
+  c.strokeStyle = INK_SOFT; c.lineWidth = 1.5 * S;
+  c.beginPath();
+  c.moveTo(W - 6 * S, H - 15 * S); c.lineTo(W - 6 * S, H - 6 * S); c.lineTo(W - 15 * S, H - 6 * S);
+  c.stroke();
+
+  /* faint paper grain */
+  c.globalAlpha = 0.02; c.fillStyle = INK;
+  for (let i = 0; i < 1400; i++) c.fillRect((Math.random() * W) | 0, (Math.random() * H) | 0, S, S);
+  c.globalAlpha = 1;
+
+  const t = new THREE.CanvasTexture(cv);
+  t.anisotropy = 16;
+  if ("colorSpace" in t) t.colorSpace = THREE.SRGBColorSpace;
+  texCache.set(key, t);
+  return t;
+}
+function disposeTextures(){ texCache.forEach(t => t.dispose()); texCache.clear(); }
+
+/* ---------- category label → CanvasTexture (transparent, tint ink) ---------- */
+function labelTexture(text){
+  const key = "lbl_" + text;
+  if (texCache.has(key)) return texCache.get(key);
+  const W = 512, H = 128, cv = document.createElement("canvas");
+  cv.width = W; cv.height = H;
+  const c = cv.getContext("2d");
+  c.textAlign = "center"; c.textBaseline = "middle";
+  c.font = "400 82px 'Chathura', 'Trebuchet MS', sans-serif";
+  c.fillStyle = "#B0A49B";
+  c.fillText(String(text).toUpperCase(), W / 2, H / 2 + 4);
+  const t = new THREE.CanvasTexture(cv);
+  t.anisotropy = 8;
+  if ("colorSpace" in t) t.colorSpace = THREE.SRGBColorSpace;
+  texCache.set(key, t);
+  return t;
+}
+
+/* ---------- one card ----------
+   At rest the card sits in its ring slot, oriented so the face normal runs along
+   the *tangent* of the circle (rotationY = angle − 90°) — the fanned, stacked-slat
+   look. The card never leaves this slot on hover (a duplicate handles that). On
+   selection every card blends from its ring slot to its carousel-stack slot,
+   driven by `anim.p` — one continuous motion into the recipe view and back. */
+function Card({ recipe, angle, onHover, onOpen }){
+  const grp = useRef();
+  const matF = useRef();
+  const matB = useRef();
+  const ringRotY = angle - Math.PI / 2;
+  const base = useMemo(
+    () => new THREE.Vector3(Math.sin(angle) * R, 0, Math.cos(angle) * R),
+    [angle]
+  );
+  useFrame(() => {
+    const g = grp.current; if (!g) return;
+    const p = anim.p;
+    const parentYaw = g.parent ? g.parent.rotation.y : 0;
+
+    if (p < 0.0005){
+      g.position.copy(base);
+      g.rotation.set(0, ringRotY, 0);
+      g.scale.setScalar(1);
+      if (matF.current) matF.current.opacity = 1;
+      if (matB.current) matB.current.opacity = 1;
+      g.children.forEach((c) => { c.renderOrder = 0; });
+      return;
+    }
+
+    // ring slot in world space (parent group is rotated about Y by parentYaw)
+    _ringW.copy(base).applyAxisAngle(Y_AXIS, parentYaw);
+    const ringWorldYaw = parentYaw + ringRotY;
+
+    // carousel slot
+    const slot = carouselSlot(recipe.id);
+    let cScale, cYaw, cOpacity;
+    if (slot){
+      _cW.copy(slot.pos); cScale = slot.scale; cYaw = 0; cOpacity = slot.opacity;
+    } else {
+      _cW.copy(_ringW).add(_recede);        // non-peer: recede + fade
+      cScale = 0.6; cYaw = ringWorldYaw; cOpacity = 0;
+    }
+
+    _blend.copy(_ringW).lerp(_cW, p);
+    g.position.copy(_blend).applyAxisAngle(Y_AXIS, -parentYaw);   // world → local
+    g.scale.setScalar(THREE.MathUtils.lerp(1, cScale, p));
+    g.rotation.set(0, lerpAngle(ringWorldYaw, cYaw, p) - parentYaw, 0);
+    const o = THREE.MathUtils.lerp(1, cOpacity, p);
+    if (matF.current) matF.current.opacity = o;
+    if (matB.current) matB.current.opacity = o;
+    const front = anim.selectedId === recipe.id && p > 0.4;
+    g.children.forEach((c) => { c.renderOrder = front ? 40 : 0; });
+    if (matF.current) matF.current.depthTest = !front;
+  });
+  return h("group", {
+    ref: grp,
+    position: base.toArray(),
+    rotation: [0, ringRotY, 0],
+    onPointerOver: (e) => { e.stopPropagation(); onHover(recipe.id); },
+    onPointerOut: (e) => { e.stopPropagation(); onHover(null); },
+    onClick: (e) => { e.stopPropagation(); onOpen(recipe.id); }
+  },
+    h("mesh", { position: [0, 0, 0.012] },
+      h("planeGeometry", { args: [CARD_W, CARD_H] }),
+      h("meshBasicMaterial", { ref: matF, map: cardTexture(recipe), toneMapped: false, side: THREE.FrontSide, transparent: true })
+    ),
+    h("mesh", { position: [0, 0, -0.012], rotation: [0, Math.PI, 0] },
+      h("planeGeometry", { args: [CARD_W, CARD_H] }),
+      h("meshBasicMaterial", { ref: matB, color: PAPER_BACK, toneMapped: false, side: THREE.FrontSide, transparent: true })
+    )
+  );
+}
+
+/* ---------- static category label, billboarded to the camera ---------- */
+function CatLabel({ text, angle }){
+  const grp = useRef();
+  const pos = useMemo(
+    () => [Math.sin(angle) * (R + 0.4), 1.7, Math.cos(angle) * (R + 0.4)],
+    [angle]
+  );
+  // yaw-only billboard: turn to face the camera but stay upright (not tilted
+  // back with the camera's downward pitch)
+  useFrame((state) => {
+    const g = grp.current; if (!g) return;
+    g.getWorldPosition(_wp);
+    const yaw = Math.atan2(state.camera.position.x - _wp.x, state.camera.position.z - _wp.z);
+    g.rotation.set(0, yaw - (g.parent ? g.parent.rotation.y : 0), 0);
+  });
+  return h("group", { ref: grp, position: pos },
+    h("mesh", null,
+      h("planeGeometry", { args: [2.0, 0.5] }),
+      h("meshBasicMaterial", { map: labelTexture(text), transparent: true, toneMapped: false, depthWrite: false })
+    )
+  );
+}
+
+/* ---------- hover preview — a duplicate of the hovered card, fixed in the
+   ring's open centre. The original stays put; this fades / scales in on the
+   spot (it does not travel from the cursor). Clicking it opens the recipe. */
+function CenterPreview({ recipe, onOpen }){
+  const grp = useRef();
+  const mat = useRef();
+  const last = useRef(null);
+  if (recipe) last.current = recipe;
+  useFrame((state) => {
+    const g = grp.current, m = mat.current; if (!g || !m) return;
+    g.position.copy(PREVIEW_POS);
+    g.quaternion.copy(state.camera.quaternion);            // billboard
+    const want = (recipe && anim.p < 0.02) ? 1 : 0;        // gone during the morph
+    m.opacity += (want - m.opacity) * 0.18;
+    const s = 1.55 + (want ? 0 : -0.25);
+    g.scale.setScalar(g.scale.x + (s - g.scale.x) * 0.18);
+    g.visible = m.opacity > 0.02;
+  });
+  const r = last.current;
+  if (!r) return null;
+  return h("group", {
+    ref: grp, renderOrder: 60,
+    onClick: (e) => { e.stopPropagation(); onOpen(r.id); }
+  },
+    h("mesh", { renderOrder: 60 },
+      h("planeGeometry", { args: [CARD_W, CARD_H] }),
+      h("meshBasicMaterial", {
+        ref: mat, map: cardTexture(r, true), toneMapped: false,
+        transparent: true, opacity: 0, depthTest: false, depthWrite: false
+      })
+    )
+  );
+}
+
+/* ---------- camera rig — oblique ring framing + cursor parallax, blending to a
+   straight-on carousel framing during the recipe morph ---------- */
+const _camPos = new THREE.Vector3();
+const _camTgt = new THREE.Vector3();
+function Rig({ pointer }){
+  const { camera, gl } = useThree();
+  const cur = useRef(CAM_BASE.clone());
+  sceneCamera = camera; sceneGL = gl;
+  useFrame(() => {
+    const pl = pointer.current, mp = anim.p;
+    // oblique ring position (+ parallax)
+    _camPos.copy(CAM_BASE).sub(CAM_TARGET)
+      .applyAxisAngle(Y_AXIS, -pl.x * PARALLAX_AZ * (1 - mp))
+      .add(CAM_TARGET);
+    _camPos.y += pl.y * PARALLAX_EL * (1 - mp);
+    _camPos.lerp(CAM_RECIPE, mp);
+    _camTgt.copy(CAM_TARGET).lerp(CAM_RECIPE_TGT, mp);
+    cur.current.lerp(_camPos, anim.phase === "ring" ? 0.06 : 0.22);
+    camera.position.copy(cur.current);
+    camera.lookAt(_camTgt);
+  });
+  return null;
+}
+
+/* ---------- the ring ---------- */
+function Ring({ recipes, categories, onOpen, resume }){
+  const group = useRef();
+  const startYaw = resume ? (resume.yaw || 0) : 0;
+  const target = useRef(startYaw);
+  const cur = useRef(startYaw);
+  const [hover, setHover] = useState(null);
+  const clearT = useRef(0);
+  const { gl } = useThree();
+
+  // debounced so a card doesn't lose focus mid-flight as it slides out from
+  // under the cursor; a fresh hover cancels any pending clear
+  const onHover = (id) => {
+    clearTimeout(clearT.current);
+    if (id) setHover(id);
+    else clearT.current = setTimeout(() => setHover(null), 320);
+  };
+
+  // rotation is driven purely by wheel deltaY — no auto-rotation
+  useEffect(() => {
+    const node = gl.domElement;
+    const onWheel = (e) => { e.preventDefault(); target.current += e.deltaY * WHEEL_K; };
+    node.addEventListener("wheel", onWheel, { passive: false });
+    // dev/test hooks: jump the ring rotation (radians); force the focused card
+    window.__recidexSpin = (rad) => { target.current = rad; };
+    window.__recidexFocus = (id) => { clearTimeout(clearT.current); setHover(id || null); };
+    return () => {
+      node.removeEventListener("wheel", onWheel);
+      delete window.__recidexSpin; delete window.__recidexFocus;
+    };
+  }, [gl]);
+
+  useFrame(() => {
+    // drive the ring ⇄ carousel morph
+    if (anim.phase === "toRecipe" || anim.phase === "toRing"){
+      anim.raw = Math.max(0, Math.min(1, (performance.now() - anim.start) / MORPH_MS));
+      const e = easeInOut(anim.raw);
+      anim.p = anim.phase === "toRecipe" ? e : 1 - e;
+      if (anim.raw >= 1){
+        if (anim.phase === "toRing"){ anim.phase = "ring"; anim.p = 0; }
+        else anim.p = 1;
+      }
+    }
+    // ambient scroll runs only when fully settled in the ring
+    if (anim.phase === "ring"){
+      cur.current += (target.current - cur.current) * 0.1;
+    }
+    if (group.current) group.current.rotation.y = cur.current;
+    anim.yaw = cur.current;
+  });
+
+  const cards = useMemo(() => {
+    const bySeg = {};
+    recipes.forEach((r) => {
+      let ci = categories.indexOf(r.category);
+      if (ci < 0) ci = 0;
+      (bySeg[ci] = bySeg[ci] || []).push(r);
+    });
+    const out = [];
+    Object.keys(bySeg).forEach((ci) => {
+      const arr = bySeg[ci];
+      arr.forEach((r, j) => {
+        const a = ci * SEG + (j - (arr.length - 1) / 2) * FAN;
+        out.push({ r, a });
+      });
+    });
+    return out;
+  }, [recipes, categories]);
+
+  useEffect(() => {
+    window.__recidexRing = cards.map(({ r, a }) => ({ id: r.id, title: r.title, category: r.category, angleDeg: Math.round(a * 180 / Math.PI) }));
+  }, [cards]);
+
+  const hoveredRecipe = recipes.find((r) => r.id === hover) || null;
+
+  return h(Fragment, null,
+    h("group", { ref: group },
+      categories.map((cat, ci) =>
+        h(CatLabel, { key: "lbl-" + cat, text: CAT_LABEL[cat] || cat, angle: ci * SEG })
+      ),
+      cards.map(({ r, a }) =>
+        h(Card, { key: r.id, recipe: r, angle: a, onHover, onOpen })
+      )
+    ),
+    h(CenterPreview, { recipe: hoveredRecipe, onOpen })
+  );
+}
+
+function Scene(props){
+  const pointer = useRef({ x: 0, y: 0 });
+  useEffect(() => {
+    const onMove = (e) => {
+      pointer.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+      pointer.current.y = -((e.clientY / window.innerHeight) * 2 - 1);
+    };
+    window.addEventListener("pointermove", onMove, { passive: true });
+    return () => window.removeEventListener("pointermove", onMove);
+  }, []);
+  return h(Canvas, {
+    dpr: [1, 2],
+    gl: { antialias: true, alpha: true, preserveDrawingBuffer: true },  // so toDataURL() works for the handoff snapshot
+    camera: { position: CAM_BASE.toArray(), fov: CAM_FOV },
+    onCreated: ({ gl }) => gl.setClearColor(0x000000, 0),
+    onPointerMissed: () => {}
+  },
+    h(Rig, { pointer }),
+    h(Ring, Object.assign({}, props, { resume: props.resume || null }))
+  );
+}
+
+/* ---------- mount bridge for the vanilla shell ---------- */
+let root = null;
+function mount(container, props){
+  unmount();
+  const resume = props.resume || null;
+  if (resume){
+    // returning from the recipe view — start in the carousel layout and morph
+    // back out to the ring, resuming scroll rotation from where it left off.
+    // `hold` keeps the carousel layout frozen while the DOM freeze-frame of the
+    // recipe view cross-fades out over the top.
+    anim.selectedId = resume.selectedId || null;
+    anim.peers = resume.peers || [];
+    anim.yaw = resume.yaw || 0;
+    anim.phase = "toRing";
+    anim.raw = 0; anim.p = 1;
+    anim.start = performance.now() + (resume.hold || 0);
+  } else {
+    anim.phase = "ring"; anim.p = 0; anim.raw = 0;
+    anim.selectedId = null; anim.peers = [];
+  }
+  root = createRoot(container);
+  const paint = () => { if (root) root.render(h(Scene, props)); };
+  paint();
+  if (document.fonts && document.fonts.status !== "loaded"){
+    document.fonts.ready.then(() => { disposeTextures(); paint(); });
+  }
+}
+function unmount(){ if (root){ root.unmount(); root = null; } }
+
+/* begin the ring → recipe morph; resolves once the cards have *actually* arrived
+   in the carousel stack (rAF-driven, not a bare timeout) so the freeze-frame
+   snapshot the shell takes next is of the settled layout, never a mid-morph one */
+function exitToRecipe(id, peerIds){
+  anim.selectedId = id;
+  anim.peers = (peerIds && peerIds.length) ? peerIds.slice() : [id];
+  anim.phase = "toRecipe";
+  anim.raw = 0; anim.p = 0;
+  anim.start = performance.now();
+  return new Promise((res) => {
+    let done = false;
+    const finish = () => { if (!done){ done = true; res(); } };
+    const check = () => { if (anim.raw >= 1) finish(); else requestAnimationFrame(check); };
+    requestAnimationFrame(check);
+    setTimeout(finish, MORPH_MS + 500);   // hard cap — never hang
+  });
+}
+
+/* freeze-frame handoff: the pixels currently on the WebGL canvas, plus the
+   screen rect the selected card occupies at the carousel forefront (projected
+   analytically through the recipe-view camera, so it's exact regardless of the
+   live camera's convergence). The shell floats a DOM <img> of this over the
+   incoming recipe view and cross-fades it — canvas → DOM is a dissolve. */
+const _projCam = new THREE.PerspectiveCamera(CAM_FOV, 1, 0.1, 100);
+function snapshot(){
+  try {
+    const url = sceneGL ? sceneGL.domElement.toDataURL("image/png") : null;
+    let rect = null;
+    const slot = carouselSlot(anim.selectedId);
+    if (slot){
+      _projCam.aspect = window.innerWidth / window.innerHeight;
+      _projCam.position.copy(CAM_RECIPE);
+      _projCam.up.set(0, 1, 0);
+      _projCam.lookAt(CAM_RECIPE_TGT);
+      _projCam.updateProjectionMatrix();
+      _projCam.updateMatrixWorld();
+      const hw = CARD_W * slot.scale / 2, hh = CARD_H * slot.scale / 2;
+      let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+      [[-hw, hh], [hw, hh], [-hw, -hh], [hw, -hh]].forEach(([x, y]) => {
+        const v = new THREE.Vector3(slot.pos.x + x, slot.pos.y + y, slot.pos.z).project(_projCam);
+        const sx = (v.x * 0.5 + 0.5) * window.innerWidth;
+        const sy = (-v.y * 0.5 + 0.5) * window.innerHeight;
+        minX = Math.min(minX, sx); maxX = Math.max(maxX, sx);
+        minY = Math.min(minY, sy); maxY = Math.max(maxY, sy);
+      });
+      rect = { x: minX, y: minY, w: maxX - minX, h: maxY - minY };
+    }
+    return { url, rect };
+  } catch (e) { return { url: null, rect: null }; }
+}
+
+window.RecidexLibrary = { ready: true, mount, unmount, exitToRecipe, snapshot, getYaw: () => anim.yaw };
+window.dispatchEvent(new Event("recidex-r3f-ready"));
+</script>
+
+<!-- ══════════════════ EXPORT ISLAND ══════════════════
+     jsPDF + html2canvas as ES modules via the import map (same pattern as the
+     R3F island — scoped CDN deps, no bundler). Exposes window.RecidexExport;
+     the vanilla shell builds a full-res `renderGraph` node and hands it over. -->
+<script type="module" async>
+import { jsPDF } from "jspdf";
+import html2canvas from "html2canvas";
+
+const SCALE = 2;
+function download(url, name){
+  const a = document.createElement("a");
+  a.href = url; a.download = name;
+  document.body.appendChild(a); a.click(); a.remove();
+}
+async function raster(node){
+  return html2canvas(node, {
+    backgroundColor: "#F0EDE4", scale: SCALE, useCORS: true, logging: false
+  });
+}
+window.RecidexExport = {
+  ready: true,
+  async jpeg(node, name){
+    const cv = await raster(node);
+    download(cv.toDataURL("image/jpeg", 0.92), name + ".jpeg");
+  },
+  async pdf(node, name){
+    const cv = await raster(node);
+    const w = (cv.width / SCALE) * 0.75, h = (cv.height / SCALE) * 0.75;   // px → pt
+    const pdf = new jsPDF({ orientation: w >= h ? "landscape" : "portrait", unit: "pt", format: [w, h] });
+    pdf.addImage(cv.toDataURL("image/jpeg", 0.95), "JPEG", 0, 0, w, h);
+    pdf.save(name + ".pdf");
+  }
+};
+window.dispatchEvent(new Event("recidex-export-ready"));
 </script>
 </body>
 </html>
