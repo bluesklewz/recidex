@@ -5,7 +5,7 @@ object worth designing — a bracket-style process diagram, a physical library y
 move through in three-dimensional space, and a card that looks and feels like
 something pulled off a shelf rather than rendered in a browser.
 
-**Live at:** _[add your deployed URL here once live]_
+**Live at: bluesklewz.github.io/recidex
 
 ---
 
